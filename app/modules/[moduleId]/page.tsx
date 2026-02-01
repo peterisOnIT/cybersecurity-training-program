@@ -1,8 +1,6 @@
 "use client";
 
-import React from "react"
-
-import { useState, use } from "react";
+import React, { useState, use } from "react";
 import Link from "next/link";
 import { Sidebar } from "@/components/training/sidebar";
 import { modules, mockUserProgress } from "@/lib/training-data";
@@ -28,12 +26,7 @@ import { cn } from "@/lib/utils";
 
 type ContentStep = "content" | "scenario" | "quiz" | "complete";
 
-export default function ModuleDetailPage({
-  params,
-}: {
-  params: Promise<{ moduleId: string }>;
-}) {
-  const { moduleId } = use(params);
+function ModuleContent({ moduleId }: { moduleId: string }) {
   const module = modules.find((m) => m.id === moduleId);
 
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
@@ -805,4 +798,13 @@ function CompletionSection({
       </div>
     </div>
   );
+}
+
+export default function ModuleDetailPage({
+  params,
+}: {
+  params: Promise<{ moduleId: string }>;
+}) {
+  const { moduleId } = use(params);
+  return <ModuleContent moduleId={moduleId} />;
 }
