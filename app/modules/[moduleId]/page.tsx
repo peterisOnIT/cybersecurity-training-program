@@ -149,45 +149,64 @@ export default function ModuleDetailPage({
           <div className="mb-6">
             <Link
               href="/modules"
-              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4"
+              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground hover:translate-x-[-4px] transition-all mb-4"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to Modules
             </Link>
 
-            <div className="flex items-start justify-between">
-              <div>
-                <Badge variant="secondary" className="mb-2">
-                  {module.category}
-                </Badge>
-                <h1 className="text-3xl font-bold text-foreground">
-                  {module.title}
-                </h1>
-                <p className="mt-2 text-muted-foreground max-w-2xl">
-                  {module.description}
-                </p>
-              </div>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1.5">
-                  <Clock className="h-4 w-4" />
-                  {module.duration}
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <BookOpen className="h-4 w-4" />
-                  {module.lessons.length} lessons
+            {/* Visual header banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-primary/5 to-transparent border border-primary/20 p-6 mb-6">
+              {/* Background pattern */}
+              <div className="absolute inset-0 opacity-[0.03]" style={{
+                backgroundImage: `linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)`,
+                backgroundSize: '24px 24px'
+              }} />
+              
+              {/* Animated orb */}
+              <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-3xl" />
+              
+              <div className="relative z-10">
+                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                  <div className="flex-1">
+                    <Badge variant="secondary" className="mb-3 bg-primary/20 text-primary border-primary/30">
+                      {module.category}
+                    </Badge>
+                    <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-2">
+                      {module.title}
+                    </h1>
+                    <p className="text-muted-foreground max-w-2xl leading-relaxed">
+                      {module.description}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-6 text-sm">
+                    <div className="flex flex-col items-center gap-1 p-3 rounded-lg bg-secondary/50 border border-border/50">
+                      <Clock className="h-5 w-5 text-primary" />
+                      <span className="font-semibold text-foreground">{module.duration}</span>
+                      <span className="text-xs text-muted-foreground">Duration</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-1 p-3 rounded-lg bg-secondary/50 border border-border/50">
+                      <BookOpen className="h-5 w-5 text-primary" />
+                      <span className="font-semibold text-foreground">{module.lessons.length}</span>
+                      <span className="text-xs text-muted-foreground">Lessons</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Progress Bar */}
-            <div className="mt-6">
+            <div className="bg-card border border-border rounded-xl p-4">
               <div className="flex items-center justify-between text-sm mb-2">
-                <span className="text-muted-foreground">Module Progress</span>
-                <span className="font-medium text-foreground">
+                <span className="text-muted-foreground font-medium">Module Progress</span>
+                <span className="font-bold text-primary tabular-nums">
                   {Math.round(progress)}%
                 </span>
               </div>
-              <Progress value={progress} className="h-2" />
+              <Progress value={progress} className="h-3" />
+              <p className="text-xs text-muted-foreground mt-2">
+                {completedLessons.size} of {module.lessons.length} lessons completed
+              </p>
             </div>
           </div>
 
@@ -410,17 +429,31 @@ function LessonContent({
   onNext: () => void;
 }) {
   return (
-    <div>
-      <h2 className="text-2xl font-bold text-foreground mb-6">
-        {lesson.title}
-      </h2>
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* Lesson title with icon */}
+      <div className="flex items-start gap-4 mb-8">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20">
+          <FileText className="h-6 w-6 text-primary" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">
+            {lesson.title}
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">Read through the content below, then continue to the next step.</p>
+        </div>
+      </div>
+
+      {/* Content */}
       <div className="prose prose-invert max-w-none">
         {lesson.content.split("\n\n").map((paragraph, index) => {
           if (paragraph.startsWith("**") && paragraph.endsWith("**")) {
             return (
-              <h3 key={index} className="text-lg font-semibold text-foreground mt-6 mb-3">
-                {paragraph.replace(/\*\*/g, "")}
-              </h3>
+              <div key={index} className="flex items-center gap-3 mt-8 mb-4">
+                <div className="h-8 w-1 rounded-full bg-gradient-to-b from-primary to-emerald-400" />
+                <h3 className="text-lg font-semibold text-foreground">
+                  {paragraph.replace(/\*\*/g, "")}
+                </h3>
+              </div>
             );
           }
           if (paragraph.startsWith("- ") || paragraph.startsWith("1. ")) {
@@ -430,27 +463,31 @@ function LessonContent({
             );
             const ListTag = isOrdered ? "ol" : "ul";
             return (
-              <ListTag
-                key={index}
-                className={cn(
-                  "space-y-2 my-4",
-                  isOrdered ? "list-decimal" : "list-disc",
-                  "pl-6"
-                )}
-              >
-                {items.map((item, i) => (
-                  <li key={i} className="text-muted-foreground">
-                    {item}
-                  </li>
-                ))}
-              </ListTag>
+              <div key={index} className="my-4 rounded-lg bg-secondary/30 border border-border/50 p-4">
+                <ListTag
+                  className={cn(
+                    "space-y-3",
+                    isOrdered ? "list-decimal" : "list-none",
+                    "pl-4"
+                  )}
+                >
+                  {items.map((item, i) => (
+                    <li key={i} className="text-muted-foreground flex items-start gap-2">
+                      {!isOrdered && (
+                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                      )}
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ListTag>
+              </div>
             );
           }
           return (
             <p key={index} className="text-muted-foreground leading-relaxed my-4">
               {paragraph.split("**").map((part, i) =>
                 i % 2 === 1 ? (
-                  <strong key={i} className="text-foreground font-semibold">
+                  <strong key={i} className="text-primary font-semibold">
                     {part}
                   </strong>
                 ) : (
@@ -461,8 +498,10 @@ function LessonContent({
           );
         })}
       </div>
-      <div className="mt-8 flex justify-end">
-        <Button onClick={onNext} size="lg">
+
+      {/* Continue button */}
+      <div className="mt-10 pt-6 border-t border-border flex justify-end">
+        <Button onClick={onNext} size="lg" className="bg-gradient-to-r from-primary to-emerald-500 hover:from-primary/90 hover:to-emerald-500/90 shadow-lg shadow-primary/20">
           Continue
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
@@ -487,38 +526,46 @@ function ScenarioSection({
   if (!scenario) return null;
 
   return (
-    <div>
-      <div className="flex items-center gap-3 mb-6">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-          <Play className="h-5 w-5 text-primary" />
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex items-start gap-4 mb-8">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/10 border border-amber-500/20">
+          <Play className="h-6 w-6 text-amber-400" />
         </div>
         <div>
           <h2 className="text-xl font-bold text-foreground">
             Interactive Scenario
           </h2>
           <p className="text-sm text-muted-foreground">
-            Apply what you've learned
+            Apply what you've learned to a real-world situation
           </p>
         </div>
       </div>
 
-      <Card className="border-primary/20 bg-primary/5 mb-6">
-        <CardContent className="p-6">
-          <h3 className="text-lg font-semibold text-foreground mb-2">
+      {/* Scenario description with visual treatment */}
+      <Card className="border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent mb-8 overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl" />
+        <CardContent className="p-6 relative z-10">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertCircle className="h-5 w-5 text-amber-400" />
+            <span className="text-sm font-medium text-amber-400">Situation</span>
+          </div>
+          <h3 className="text-lg font-semibold text-foreground mb-3">
             {scenario.title}
           </h3>
-          <p className="text-muted-foreground">{scenario.description}</p>
+          <p className="text-muted-foreground leading-relaxed">{scenario.description}</p>
         </CardContent>
       </Card>
 
-      <h4 className="text-sm font-medium text-foreground mb-4">
+      <h4 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+        <HelpCircle className="h-4 w-4 text-primary" />
         What would you do?
       </h4>
 
       <div className="space-y-3">
-        {scenario.options.map((option) => {
+        {scenario.options.map((option, index) => {
           const isSelected = selectedOption?.id === option.id;
           const showResult = showFeedback && isSelected;
+          const isCorrectAnswer = showFeedback && option.isCorrect;
 
           return (
             <button
@@ -526,51 +573,66 @@ function ScenarioSection({
               onClick={() => !showFeedback && onSelect(option)}
               disabled={showFeedback}
               className={cn(
-                "w-full text-left rounded-lg border p-4 transition-all",
+                "w-full text-left rounded-xl border p-5 transition-all duration-300",
                 isSelected
                   ? option.isCorrect
-                    ? "border-primary bg-primary/10"
-                    : "border-destructive bg-destructive/10"
-                  : "border-border bg-card hover:border-primary/50",
-                showFeedback && !isSelected && "opacity-50"
+                    ? "border-primary bg-primary/10 shadow-lg shadow-primary/10"
+                    : "border-destructive bg-destructive/10 shadow-lg shadow-destructive/10"
+                  : showFeedback && isCorrectAnswer
+                    ? "border-primary/50 bg-primary/5"
+                    : "border-border bg-card hover:border-primary/50 hover:bg-secondary/30 hover:translate-x-1",
+                showFeedback && !isSelected && !isCorrectAnswer && "opacity-40"
               )}
+              style={{ animationDelay: `${index * 100}ms` }}
             >
-              <div className="flex items-start gap-3">
+              <div className="flex items-start gap-4">
                 <div
                   className={cn(
-                    "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-medium",
+                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-bold transition-all duration-300",
                     isSelected
                       ? option.isCorrect
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-destructive text-destructive-foreground"
-                      : "bg-secondary text-secondary-foreground"
+                        ? "bg-primary text-primary-foreground scale-110"
+                        : "bg-destructive text-destructive-foreground scale-110"
+                      : showFeedback && isCorrectAnswer
+                        ? "bg-primary/20 text-primary"
+                        : "bg-secondary text-secondary-foreground"
                   )}
                 >
-                  {showResult ? (
+                  {showResult || (showFeedback && isCorrectAnswer) ? (
                     option.isCorrect ? (
-                      <Check className="h-3 w-3" />
+                      <Check className="h-4 w-4" />
                     ) : (
-                      <X className="h-3 w-3" />
+                      <X className="h-4 w-4" />
                     )
                   ) : (
                     option.id.toUpperCase()
                   )}
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-card-foreground">
+                  <p className="font-medium text-card-foreground leading-relaxed">
                     {option.text}
                   </p>
-                  {showResult && (
-                    <p
+                  {(showResult || (showFeedback && isCorrectAnswer)) && (
+                    <div
                       className={cn(
-                        "mt-2 text-sm",
+                        "mt-3 p-3 rounded-lg text-sm animate-in fade-in slide-in-from-top-2 duration-300",
                         option.isCorrect
-                          ? "text-primary"
-                          : "text-destructive"
+                          ? "bg-primary/10 text-primary border border-primary/20"
+                          : "bg-destructive/10 text-destructive border border-destructive/20"
                       )}
                     >
-                      {option.feedback}
-                    </p>
+                      <div className="flex items-center gap-2 mb-1">
+                        {option.isCorrect ? (
+                          <CheckCircle2 className="h-4 w-4" />
+                        ) : (
+                          <AlertCircle className="h-4 w-4" />
+                        )}
+                        <span className="font-semibold">
+                          {option.isCorrect ? "Correct!" : "Not quite right"}
+                        </span>
+                      </div>
+                      <p>{option.feedback}</p>
+                    </div>
                   )}
                 </div>
               </div>
@@ -580,8 +642,8 @@ function ScenarioSection({
       </div>
 
       {showFeedback && (
-        <div className="mt-8 flex justify-end">
-          <Button onClick={onNext} size="lg">
+        <div className="mt-10 pt-6 border-t border-border flex justify-end">
+          <Button onClick={onNext} size="lg" className="bg-gradient-to-r from-primary to-emerald-500 hover:from-primary/90 hover:to-emerald-500/90 shadow-lg shadow-primary/20">
             Continue
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>

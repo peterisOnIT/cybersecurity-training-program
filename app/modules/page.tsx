@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Sidebar, MobileHeader } from "@/components/training/sidebar";
 import { ModuleCard } from "@/components/training/module-card";
 import { modules, mockUserProgress } from "@/lib/training-data";
-import { Search, Filter, Grid3X3, List } from "lucide-react";
+import { Search, Filter, Grid3X3, List, Shield } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -69,15 +69,35 @@ export default function ModulesPage() {
 
       <main id="main-content" className="pt-14 lg:pt-0 lg:pl-64">
         <div className="px-4 py-6 lg:px-8 lg:py-8">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground">
-              Training Modules
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              Complete interactive training modules to improve your security
-              awareness.
-            </p>
+          {/* Header with visual banner */}
+          <div className="mb-8 relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-primary/5 to-transparent border border-primary/20 p-6 lg:p-8">
+            {/* Background pattern */}
+            <div className="absolute inset-0 opacity-[0.03]" style={{
+              backgroundImage: `linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)`,
+              backgroundSize: '32px 32px'
+            }} />
+            
+            {/* Animated orbs */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-float" />
+            <div className="absolute bottom-0 left-1/4 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }} />
+            
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/20 border border-primary/30">
+                  <Shield className="h-6 w-6 text-primary" />
+                </div>
+                <Badge className="bg-primary/20 text-primary border-primary/30">
+                  {modules.length} Modules Available
+                </Badge>
+              </div>
+              <h1 className="text-3xl lg:text-4xl font-bold text-foreground mb-2">
+                Training Modules
+              </h1>
+              <p className="text-muted-foreground max-w-2xl">
+                Complete interactive training modules to improve your security awareness. 
+                Each module includes lessons, real-world scenarios, and quizzes.
+              </p>
+            </div>
           </div>
 
           {/* Stats Bar */}
