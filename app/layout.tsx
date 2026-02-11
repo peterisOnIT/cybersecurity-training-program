@@ -7,22 +7,21 @@ const _inter = Inter({ subsets: ["latin"] })
 const _jetbrainsMono = JetBrains_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Cyber Clash - Phish or Legit?",
+  title: "Cyber Clash - The Phishing Party Game",
   description:
-    "A real-time multiplayer cybersecurity awareness game. Test your skills at spotting phishing attacks in this Jackbox/Kahoot-inspired quiz game.",
+    "A Jackbox-style multiplayer party game for cybersecurity awareness training. Join with a room code and test your phishing detection skills!",
   keywords: [
     "cybersecurity",
     "phishing",
-    "game",
+    "party game",
     "multiplayer",
-    "security awareness",
+    "jackbox",
     "training",
   ],
-  authors: [{ name: "Cyber Clash" }],
 }
 
 export const viewport: Viewport = {
-  themeColor: "#0a1a0f",
+  themeColor: "#2a1f5e",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -38,7 +37,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg"
         >
           Skip to main content
         </a>
