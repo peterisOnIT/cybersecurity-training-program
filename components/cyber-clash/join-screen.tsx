@@ -197,6 +197,25 @@ export function JoinScreen({ onCreated, onJoined }: JoinScreenProps) {
         {/* Join form */}
         {mode === "join" && (
           <div className="flex w-full animate-fade-in flex-col gap-5">
+            {/* Name input (required for QR code joins too) */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-black tracking-[0.15em] uppercase" style={{ color: "rgba(255,255,255,0.4)" }} htmlFor="join-player-name">
+                Your Name
+              </label>
+              <input
+                id="join-player-name"
+                type="text"
+                value={name}
+                onChange={(e) => { setName(e.target.value); setError(null); }}
+                placeholder="Enter your name..."
+                maxLength={20}
+                autoComplete="off"
+                autoFocus
+                className="w-full rounded-2xl border-[3px] border-white/10 px-5 py-4 text-lg font-bold outline-none transition-all duration-200 focus:border-[#FFB800]"
+                style={{ background: "var(--cc-card)", color: "#fff" }}
+              />
+            </div>
+
             <div className="flex flex-col gap-2">
               <label className="text-xs font-black tracking-[0.15em] uppercase" style={{ color: "rgba(255,255,255,0.4)" }} htmlFor="room-code">
                 Room Code
@@ -209,7 +228,6 @@ export function JoinScreen({ onCreated, onJoined }: JoinScreenProps) {
                 placeholder="ABCDE"
                 maxLength={5}
                 autoComplete="off"
-                autoFocus
                 className="w-full rounded-2xl border-[3px] border-white/10 px-5 py-4 text-center text-3xl font-black tracking-[0.4em] uppercase outline-none transition-all duration-200 focus:border-[#FFB800]"
                 style={{ background: "var(--cc-card)", color: "#fff" }}
               />
@@ -217,7 +235,7 @@ export function JoinScreen({ onCreated, onJoined }: JoinScreenProps) {
 
             <button
               onClick={handleJoin}
-              disabled={loading || roomCode.length < 5}
+              disabled={loading || roomCode.length < 5 || !name.trim()}
               className="jackbox-btn flex w-full items-center justify-center gap-3 rounded-2xl border-[3px] px-6 py-5 text-xl disabled:opacity-40"
               style={{
                 borderColor: "#FFB800",

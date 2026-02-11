@@ -31,12 +31,10 @@ export function QRCode({ value, size = 180 }: QRCodeProps) {
         .then((url: string) => {
           setDataUrl(url);
         })
-        .catch((err: unknown) => {
-          console.log("[v0] QR generation failed:", err);
+        .catch(() => {
           setError(true);
         });
-    }).catch((err) => {
-      console.log("[v0] QR import failed:", err);
+    }).catch(() => {
       setError(true);
     });
   }, [value, size]);

@@ -55,6 +55,27 @@ export function LobbyScreen({ room, playerId, isHost, onStartCountdown, onStartG
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4" style={{ background: "var(--cc-dark)" }}>
+      {/* Fixed top-right QR Code card */}
+      {joinUrl && (
+        <div
+          className="fixed right-4 top-4 z-50 flex flex-col items-center gap-2 rounded-2xl border-[3px] p-4 shadow-2xl"
+          style={{ borderColor: "rgba(0,229,255,0.3)", background: "rgba(11,15,26,0.97)", backdropFilter: "blur(16px)" }}
+        >
+          <p className="text-xs font-black tracking-[0.15em] uppercase" style={{ color: "#00E5FF" }}>
+            Join Here!
+          </p>
+          <div className="overflow-hidden rounded-xl bg-white p-2">
+            <QRCode value={joinUrl} size={130} />
+          </div>
+          <p className="rounded-lg px-3 py-1 text-sm font-black tracking-[0.25em]" style={{ color: "#00E5FF", background: "rgba(0,229,255,0.08)" }}>
+            {room.id}
+          </p>
+          <p className="text-center text-[10px] font-bold" style={{ color: "rgba(255,255,255,0.3)" }}>
+            Scan with phone camera
+          </p>
+        </div>
+      )}
+
       {/* Animated background */}
       <div className="pointer-events-none fixed inset-0" aria-hidden="true">
         <div className="absolute inset-0" style={{
@@ -100,24 +121,6 @@ export function LobbyScreen({ room, playerId, isHost, onStartCountdown, onStartG
             {copied ? "Copied!" : "Share this code or scan the QR code"}
           </p>
         </div>
-
-      {/* Fixed top-right QR Code card */}
-      {joinUrl && (
-        <div
-          className="absolute right-6 top-6 z-20 flex flex-col items-center gap-2 rounded-2xl border-[3px] p-4"
-          style={{ borderColor: "rgba(0,229,255,0.25)", background: "rgba(11,15,26,0.95)", backdropFilter: "blur(12px)" }}
-        >
-          <p className="text-xs font-black tracking-[0.15em] uppercase" style={{ color: "#00E5FF" }}>
-            Join Here!
-          </p>
-          <div className="overflow-hidden rounded-lg bg-white p-2">
-            <QRCode value={joinUrl} size={140} />
-          </div>
-          <p className="text-center text-[10px] font-bold" style={{ color: "rgba(255,255,255,0.3)" }}>
-            Scan with phone camera
-          </p>
-        </div>
-      )}
 
         {/* Player list */}
         <div className="w-full">
