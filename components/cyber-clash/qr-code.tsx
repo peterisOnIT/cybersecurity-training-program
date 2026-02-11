@@ -1,58 +1,76 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import QRCodeLib from "qrcode";
+import { useEffect, useState } from "react";
 
 interface QRCodeProps {
   value: string;
   size?: number;
-  fgColor?: string;
-  bgColor?: string;
 }
 
-export function QRCode({ value, size = 180, fgColor = "#000000", bgColor = "#ffffff" }: QRCodeProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+export function QRCode({ value, size = 180 }: QRCodeProps) {
+  const [dataUrl, setDataUrl] = useState<string | null>(null);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || !value) return;
+    if (!value) return;
+    setError(false);
+    setDataUrl(null);
 
-    QRCodeLib.toCanvas(canvas, value, {
-      width: size,
-      margin: 2,
-      color: {
-        dark: fgColor,
-        light: bgColor,
-      },
-      errorCorrectionLevel: "M",
-    }, (err) => {
-      if (err) {
-        console.error("QR code generation failed:", err);
-        setError(true);
-      } else {
-        setError(false);
-      }
+    // Use the qrcode library to generate a data URL
+    import("qrcode").then((QRCodeLib) => {
+      const lib = QRCodeLib.default || QRCodeLib;
+      lib.toDataURL(value, {
+        width: size * 2, // 2x for retina
+        margin: 2,
+        color: {
+          dark: "#000000",
+          light: "#ffffff",
+        },
+        errorCorrectionLevel: "M",
+      })
+        .then((url: string) => {
+          setDataUrl(url);
+        })
+        .catch((err: unknown) => {
+          console.log("[v0] QR generation failed:", err);
+          setError(true);
+        });
+    }).catch((err) => {
+      console.log("[v0] QR import failed:", err);
+      setError(true);
     });
-  }, [value, size, fgColor, bgColor]);
+  }, [value, size]);
 
   if (error) {
     return (
       <div
-        className="flex items-center justify-center rounded-xl text-center text-xs font-bold"
-        style={{ width: size, height: size, background: bgColor, color: fgColor }}
+        className="flex items-center justify-center rounded-xl bg-white text-center text-xs font-bold text-black"
+        style={{ width: size, height: size }}
       >
-        <span>QR unavailable.<br />Use the room code above.</span>
+        <span>QR unavailable.<br />Use room code.</span>
+      </div>
+    );
+  }
+
+  if (!dataUrl) {
+    return (
+      <div
+        className="flex items-center justify-center rounded-xl bg-white"
+        style={{ width: size, height: size }}
+      >
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
       </div>
     );
   }
 
   return (
-    <canvas
-      ref={canvasRef}
-      style={{ width: size, height: size }}
-      aria-label={`QR code to join game: ${value}`}
-      role="img"
+    <img
+      src={dataUrl}
+      alt={`QR code to join game`}
+      width={size}
+      height={size}
+      className="rounded-xl"
+      style={{ imageRendering: "pixelated" }}
     />
   );
 }

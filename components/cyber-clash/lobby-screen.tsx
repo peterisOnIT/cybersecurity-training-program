@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Copy, Check, Users, Zap, Shield, Crown, Loader2, Fish, ShieldCheck, Sparkles, Mail, Lock, QrCode } from "lucide-react";
+import { Copy, Check, Users, Zap, Shield, Crown, Loader2, Fish, ShieldCheck, Sparkles, Mail, Lock } from "lucide-react";
 import type { GameRoom } from "@/lib/game-room";
 import { QRCode } from "@/components/cyber-clash/qr-code";
 
@@ -18,8 +18,6 @@ interface LobbyScreenProps {
 export function LobbyScreen({ room, playerId, isHost, onStartCountdown, onStartGame }: LobbyScreenProps) {
   const [copied, setCopied] = useState(false);
   const [countdownDisplay, setCountdownDisplay] = useState<number | null>(null);
-  const [showQR, setShowQR] = useState(true);
-
   // Build the join URL with room code
   const joinUrl = typeof window !== "undefined"
     ? `${window.location.origin}?code=${room.id}`
@@ -98,40 +96,28 @@ export function LobbyScreen({ room, playerId, isHost, onStartCountdown, onStartG
               <Copy className="h-6 w-6 transition-transform group-hover:scale-110" style={{ color: "rgba(255,255,255,0.4)" }} />
             )}
           </button>
-          <div className="flex items-center gap-3">
-            <p className="text-sm font-semibold" style={{ color: "rgba(255,255,255,0.35)" }}>
-              {copied ? "Copied!" : "Share this code with other players"}
-            </p>
-            <button
-              onClick={() => setShowQR((v) => !v)}
-              className="flex items-center gap-1.5 rounded-full border-[2px] px-3 py-1 text-[11px] font-black uppercase tracking-wider transition-all duration-200"
-              style={{
-                borderColor: showQR ? "#00E5FF" : "rgba(255,255,255,0.15)",
-                color: showQR ? "#00E5FF" : "rgba(255,255,255,0.4)",
-                background: showQR ? "rgba(0,229,255,0.08)" : "transparent",
-              }}
-              aria-label={showQR ? "Hide QR code" : "Show QR code"}
-            >
-              <QrCode className="h-3.5 w-3.5" />
-              QR
-            </button>
-          </div>
-
-          {/* QR Code */}
-          {showQR && joinUrl && (
-            <div
-              className="animate-fade-in flex flex-col items-center gap-3 rounded-2xl border-[3px] p-5"
-              style={{ borderColor: "rgba(0,229,255,0.15)", background: "rgba(0,229,255,0.04)" }}
-            >
-              <div className="rounded-xl bg-white p-3">
-                <QRCode value={joinUrl} size={180} fgColor="#0B0F1A" bgColor="#ffffff" />
-              </div>
-              <p className="text-center text-xs font-bold" style={{ color: "rgba(255,255,255,0.35)" }}>
-                Scan to join on another device
-              </p>
-            </div>
-          )}
+          <p className="text-sm font-semibold" style={{ color: "rgba(255,255,255,0.35)" }}>
+            {copied ? "Copied!" : "Share this code or scan the QR code"}
+          </p>
         </div>
+
+      {/* Fixed top-right QR Code card */}
+      {joinUrl && (
+        <div
+          className="absolute right-6 top-6 z-20 flex flex-col items-center gap-2 rounded-2xl border-[3px] p-4"
+          style={{ borderColor: "rgba(0,229,255,0.25)", background: "rgba(11,15,26,0.95)", backdropFilter: "blur(12px)" }}
+        >
+          <p className="text-xs font-black tracking-[0.15em] uppercase" style={{ color: "#00E5FF" }}>
+            Join Here!
+          </p>
+          <div className="overflow-hidden rounded-lg bg-white p-2">
+            <QRCode value={joinUrl} size={140} />
+          </div>
+          <p className="text-center text-[10px] font-bold" style={{ color: "rgba(255,255,255,0.3)" }}>
+            Scan with phone camera
+          </p>
+        </div>
+      )}
 
         {/* Player list */}
         <div className="w-full">
