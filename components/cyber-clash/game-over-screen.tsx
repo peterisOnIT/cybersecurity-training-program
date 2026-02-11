@@ -91,11 +91,11 @@ export function GameOverScreen({ players, myPlayerId, isHost, onPlayAgain, onLea
 
       <div className={`relative z-10 w-full max-w-lg transition-all duration-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
         {/* Trophy */}
-        <div className="mb-8 text-center">
-          <div className="mb-6 flex justify-center">
+        <div className="mb-6 text-center sm:mb-8">
+          <div className="mb-4 flex justify-center sm:mb-6">
             <div className="relative">
               <div
-                className="flex h-28 w-28 items-center justify-center rounded-[2rem]"
+                className="flex h-20 w-20 items-center justify-center rounded-[1.5rem] sm:h-28 sm:w-28 sm:rounded-[2rem]"
                 style={{
                   background: isWinner ? "#FFB800" : "var(--cc-card)",
                   border: isWinner ? "none" : "3px solid rgba(255,255,255,0.08)",
@@ -103,9 +103,9 @@ export function GameOverScreen({ players, myPlayerId, isHost, onPlayAgain, onLea
                 }}
               >
                 {isWinner ? (
-                  <Crown className="h-14 w-14" style={{ color: "var(--cc-dark)" }} />
+                  <Crown className="h-10 w-10 sm:h-14 sm:w-14" style={{ color: "var(--cc-dark)" }} />
                 ) : (
-                  <Trophy className="h-14 w-14" style={{ color: "#FFB800" }} />
+                  <Trophy className="h-10 w-10 sm:h-14 sm:w-14" style={{ color: "#FFB800" }} />
                 )}
               </div>
               {isWinner && (
@@ -120,7 +120,7 @@ export function GameOverScreen({ players, myPlayerId, isHost, onPlayAgain, onLea
             </div>
           </div>
 
-          <h2 className="text-balance text-6xl font-black uppercase tracking-tighter" style={{ color: "#fff" }}>
+          <h2 className="text-balance text-4xl font-black uppercase tracking-tighter sm:text-6xl" style={{ color: "#fff" }}>
             Game<br />
             <span style={{ color: isWinner ? "#FFB800" : "#00E5FF" }}>Over</span>
           </h2>
@@ -159,7 +159,7 @@ export function GameOverScreen({ players, myPlayerId, isHost, onPlayAgain, onLea
               return (
                 <div
                   key={player.id}
-                  className="flex items-center gap-4 px-6 py-4 transition-all duration-500"
+                  className="flex items-center gap-3 px-4 py-3 transition-all duration-500 sm:gap-4 sm:px-6 sm:py-4"
                   style={{
                     background: rank === 1 ? "rgba(255,184,0,0.04)" : isMe ? `${color}06` : "transparent",
                     borderBottom: index < sorted.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
@@ -210,7 +210,7 @@ export function GameOverScreen({ players, myPlayerId, isHost, onPlayAgain, onLea
           {isHost && (
             <button
               onClick={onPlayAgain}
-              className="jackbox-btn flex items-center justify-center gap-3 rounded-2xl px-6 py-5 text-xl"
+              className="jackbox-btn flex items-center justify-center gap-3 rounded-2xl px-5 py-4 text-lg sm:px-6 sm:py-5 sm:text-xl"
               style={{ background: "#00E5FF", color: "var(--cc-dark)", boxShadow: "0 4px 30px rgba(0,229,255,0.3)" }}
             >
               <RotateCcw className="h-6 w-6" />

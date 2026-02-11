@@ -128,17 +128,17 @@ export function GameScreen({ room, playerId, isHost, onAnswer, onShowResults, on
         }} />
       </div>
 
-      <div className="relative flex flex-1 flex-col px-4 py-6 lg:px-10 lg:py-8">
+      <div className="relative flex flex-1 flex-col px-3 py-4 sm:px-4 sm:py-6 lg:px-10 lg:py-8">
         {/* Top bar */}
-        <div className="mb-5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl"
+        <div className="mb-3 flex items-center justify-between gap-2 sm:mb-5">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl sm:h-12 sm:w-12 sm:rounded-2xl"
               style={{ background: `${roundColor}15`, border: `2px solid ${roundColor}30` }}>
-              <RoundIcon className="h-6 w-6" style={{ color: roundColor }} />
+              <RoundIcon className="h-4 w-4 sm:h-6 sm:w-6" style={{ color: roundColor }} />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <p className="text-xl font-black" style={{ color: "#fff" }}>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <p className="text-base font-black sm:text-xl" style={{ color: "#fff" }}>
                   {'Round '}
                   <span style={{ color: roundColor }}>{room.currentQuestion + 1}</span>
                   <span style={{ color: "rgba(255,255,255,0.2)" }}>{' of '}{room.totalQuestions}</span>
@@ -285,7 +285,7 @@ export function GameScreen({ room, playerId, isHost, onAnswer, onShowResults, on
           </div>
         )}
       </div>
-      <div className="px-4 pb-6 lg:hidden">
+      <div className="px-3 pb-4 sm:px-4 sm:pb-6 lg:hidden">
         <Leaderboard players={room.players} myPlayerId={playerId} compact />
       </div>
     </div>
@@ -303,8 +303,8 @@ function PhishContent({ round, showingResults, highlightClues }: { round: PhishR
         transition: "border-color 0.5s ease",
         boxShadow: showingResults ? `0 0 40px ${round.isPhishing ? "rgba(255,45,120,0.1)" : "rgba(57,255,20,0.1)"}` : "none",
       }}>
-      <div className="px-6 py-4" style={{ borderBottom: "3px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}>
-        <div className="flex flex-col gap-2">
+      <div className="px-4 py-3 sm:px-6 sm:py-4" style={{ borderBottom: "3px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}>
+        <div className="flex flex-col gap-1.5 sm:gap-2">
           <div className="flex items-baseline gap-3">
             <span className="text-[10px] font-black tracking-[0.15em] uppercase" style={{ color: "rgba(255,255,255,0.3)" }}>From</span>
             <span className="text-sm font-bold" style={{ color: "#00E5FF" }}>
@@ -323,8 +323,8 @@ function PhishContent({ round, showingResults, highlightClues }: { round: PhishR
           </div>
         </div>
       </div>
-      <div className="px-6 py-6">
-        <p className="whitespace-pre-line font-mono text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>{round.body}</p>
+      <div className="px-4 py-4 sm:px-6 sm:py-6">
+        <p className="whitespace-pre-line font-mono text-xs leading-relaxed sm:text-sm" style={{ color: "rgba(255,255,255,0.75)" }}>{round.body}</p>
       </div>
       {showingResults && (
         <div className="animate-pop-in flex items-center justify-center gap-3 px-6 py-5"
@@ -356,9 +356,9 @@ function PasswordContent({ round, showingResults }: { round: PasswordRound; show
         <KeyRound className="h-5 w-5" style={{ color: "#A855F7" }} />
         <span className="text-xs font-black tracking-[0.15em] uppercase" style={{ color: "#A855F7" }}>Rate This Password</span>
       </div>
-      <div className="flex items-center justify-center px-6 py-10">
-        <div className="rounded-2xl border-[3px] px-8 py-5" style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.1)" }}>
-          <p className="font-mono text-2xl font-bold tracking-wider md:text-3xl" style={{ color: "#fff", wordBreak: "break-all" }}>
+      <div className="flex items-center justify-center px-4 py-6 sm:px-6 sm:py-10">
+        <div className="rounded-2xl border-[3px] px-5 py-4 sm:px-8 sm:py-5" style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.1)" }}>
+          <p className="font-mono text-xl font-bold tracking-wider sm:text-2xl md:text-3xl" style={{ color: "#fff", wordBreak: "break-all" }}>
             {round.password}
           </p>
         </div>
@@ -415,24 +415,24 @@ function URLContent({ round, showingResults, highlightClues }: { round: SpotURLR
 
 function PhishButtons({ onAnswer }: { onAnswer: (a: number) => void }) {
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4">
       <button onClick={() => onAnswer(1)}
-        className="jackbox-btn group flex flex-col items-center gap-4 rounded-3xl border-[3px] px-6 py-8"
+        className="jackbox-btn group flex flex-col items-center gap-2 rounded-2xl border-[3px] px-4 py-5 sm:gap-4 sm:rounded-3xl sm:px-6 sm:py-8"
         style={{ background: "rgba(255,45,120,0.06)", borderColor: "rgba(255,45,120,0.25)" }}
         onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#FF2D78"; e.currentTarget.style.background = "rgba(255,45,120,0.12)"; e.currentTarget.style.boxShadow = "0 0 30px rgba(255,45,120,0.15)"; }}
         onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,45,120,0.25)"; e.currentTarget.style.background = "rgba(255,45,120,0.06)"; e.currentTarget.style.boxShadow = "none"; }}>
-        <Fish className="h-14 w-14 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-[-8deg]" style={{ color: "#FF2D78" }} />
-        <span className="text-2xl font-black uppercase tracking-wide" style={{ color: "#FF2D78" }}>Phishing</span>
-        <span className="text-[11px] font-bold" style={{ color: "rgba(255,255,255,0.3)" }}>{"It's a scam!"}</span>
+        <Fish className="h-10 w-10 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-[-8deg] sm:h-14 sm:w-14" style={{ color: "#FF2D78" }} />
+        <span className="text-lg font-black uppercase tracking-wide sm:text-2xl" style={{ color: "#FF2D78" }}>Phishing</span>
+        <span className="hidden text-[11px] font-bold sm:block" style={{ color: "rgba(255,255,255,0.3)" }}>{"It's a scam!"}</span>
       </button>
       <button onClick={() => onAnswer(0)}
-        className="jackbox-btn group flex flex-col items-center gap-4 rounded-3xl border-[3px] px-6 py-8"
+        className="jackbox-btn group flex flex-col items-center gap-2 rounded-2xl border-[3px] px-4 py-5 sm:gap-4 sm:rounded-3xl sm:px-6 sm:py-8"
         style={{ background: "rgba(57,255,20,0.04)", borderColor: "rgba(57,255,20,0.25)" }}
         onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#39FF14"; e.currentTarget.style.background = "rgba(57,255,20,0.10)"; e.currentTarget.style.boxShadow = "0 0 30px rgba(57,255,20,0.15)"; }}
         onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(57,255,20,0.25)"; e.currentTarget.style.background = "rgba(57,255,20,0.04)"; e.currentTarget.style.boxShadow = "none"; }}>
-        <ShieldCheck className="h-14 w-14 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-[8deg]" style={{ color: "#39FF14" }} />
-        <span className="text-2xl font-black uppercase tracking-wide" style={{ color: "#39FF14" }}>Legit</span>
-        <span className="text-[11px] font-bold" style={{ color: "rgba(255,255,255,0.3)" }}>{"It's real!"}</span>
+        <ShieldCheck className="h-10 w-10 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-[8deg] sm:h-14 sm:w-14" style={{ color: "#39FF14" }} />
+        <span className="text-lg font-black uppercase tracking-wide sm:text-2xl" style={{ color: "#39FF14" }}>Legit</span>
+        <span className="hidden text-[11px] font-bold sm:block" style={{ color: "rgba(255,255,255,0.3)" }}>{"It's real!"}</span>
       </button>
     </div>
   );
@@ -442,18 +442,18 @@ function PasswordButtons({ round, onAnswer }: { round: PasswordRound; onAnswer: 
   const colors = ["#39FF14", "#FFB800", "#FF2D78"];
   const icons = [ShieldCheck, AlertTriangle, XCircle];
   return (
-    <div className="grid grid-cols-3 gap-3">
+    <div className="grid grid-cols-3 gap-2 sm:gap-3">
       {round.options.map((opt, i) => {
         const Icon = icons[i];
         const color = colors[i];
         return (
           <button key={i} onClick={() => onAnswer(i)}
-            className="jackbox-btn group flex flex-col items-center gap-3 rounded-3xl border-[3px] px-4 py-6"
+            className="jackbox-btn group flex flex-col items-center gap-2 rounded-2xl border-[3px] px-2 py-4 sm:gap-3 sm:rounded-3xl sm:px-4 sm:py-6"
             style={{ background: `${color}08`, borderColor: `${color}25` }}
             onMouseEnter={(e) => { e.currentTarget.style.borderColor = color; e.currentTarget.style.background = `${color}15`; e.currentTarget.style.boxShadow = `0 0 25px ${color}20`; }}
             onMouseLeave={(e) => { e.currentTarget.style.borderColor = `${color}25`; e.currentTarget.style.background = `${color}08`; e.currentTarget.style.boxShadow = "none"; }}>
-            <Icon className="h-10 w-10 transition-transform duration-200 group-hover:scale-110" style={{ color }} />
-            <span className="text-lg font-black uppercase tracking-wide" style={{ color }}>{opt}</span>
+            <Icon className="h-7 w-7 transition-transform duration-200 group-hover:scale-110 sm:h-10 sm:w-10" style={{ color }} />
+            <span className="text-sm font-black uppercase tracking-wide sm:text-lg" style={{ color }}>{opt}</span>
           </button>
         );
       })}
@@ -467,7 +467,7 @@ function URLButtons({ round, onAnswer }: { round: SpotURLRound; onAnswer: (a: nu
     <div className="flex flex-col gap-3">
       {round.urls.map((u, i) => (
         <button key={i} onClick={() => onAnswer(i)}
-          className="jackbox-btn group flex items-center gap-4 rounded-2xl border-[3px] px-5 py-5 text-left"
+          className="jackbox-btn group flex items-center gap-3 rounded-2xl border-[3px] px-3 py-3 text-left sm:gap-4 sm:px-5 sm:py-5"
           style={{ background: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.08)" }}
           onMouseEnter={(e) => { e.currentTarget.style.borderColor = colors[i % colors.length]; e.currentTarget.style.background = `${colors[i % colors.length]}08`; }}
           onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; e.currentTarget.style.background = "rgba(255,255,255,0.02)"; }}>
@@ -490,10 +490,10 @@ function URLButtons({ round, onAnswer }: { round: SpotURLRound; onAnswer: (a: nu
 
 function LockedInState({ players, currentQuestion, answeredCount, color }: { players: GameRoom["players"]; currentQuestion: number; answeredCount: number; color: string }) {
   return (
-    <div className="animate-pop-in flex flex-col items-center gap-4 rounded-3xl border-[3px] px-8 py-8"
+    <div className="animate-pop-in flex flex-col items-center gap-3 rounded-2xl border-[3px] px-5 py-5 sm:gap-4 sm:rounded-3xl sm:px-8 sm:py-8"
       style={{ background: "var(--cc-card)", borderColor: `${color}20` }}>
-      <Lock className="h-12 w-12 animate-float" style={{ color }} />
-      <p className="text-2xl font-black uppercase" style={{ color: "#fff" }}>Answer Locked In!</p>
+      <Lock className="h-8 w-8 animate-float sm:h-12 sm:w-12" style={{ color }} />
+      <p className="text-lg font-black uppercase sm:text-2xl" style={{ color: "#fff" }}>Answer Locked In!</p>
       <div className="flex items-center gap-1.5">
         {players.map((p) => {
           const pAnswered = p.answers.length > currentQuestion;
@@ -510,10 +510,10 @@ function LockedInState({ players, currentQuestion, answeredCount, color }: { pla
 
 function TimesUpState() {
   return (
-    <div className="animate-pop-in flex flex-col items-center gap-4 rounded-3xl border-[3px] px-8 py-8"
+    <div className="animate-pop-in flex flex-col items-center gap-3 rounded-2xl border-[3px] px-5 py-5 sm:gap-4 sm:rounded-3xl sm:px-8 sm:py-8"
       style={{ background: "rgba(255,45,120,0.04)", borderColor: "rgba(255,45,120,0.2)" }}>
-      <AlertTriangle className="h-12 w-12 animate-wiggle" style={{ color: "#FF2D78" }} />
-      <p className="text-2xl font-black uppercase" style={{ color: "#FF2D78" }}>{"Time's Up!"}</p>
+      <AlertTriangle className="h-8 w-8 animate-wiggle sm:h-12 sm:w-12" style={{ color: "#FF2D78" }} />
+      <p className="text-lg font-black uppercase sm:text-2xl" style={{ color: "#FF2D78" }}>{"Time's Up!"}</p>
       <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.3)" }}>You did not answer in time</span>
     </div>
   );
@@ -530,16 +530,16 @@ function ResultsReveal({ round, room, wasCorrect, playerStreak, showScorePopup, 
       {/* Score popup */}
       {showScorePopup && (
         <div className="flex items-center justify-center gap-6">
-          <div className="animate-pop-in flex items-center gap-4 rounded-2xl px-6 py-4"
+          <div className="animate-pop-in flex items-center gap-3 rounded-2xl px-4 py-3 sm:gap-4 sm:px-6 sm:py-4"
             style={{
               background: wasCorrect ? "rgba(57,255,20,0.08)" : wasCorrect === false ? "rgba(255,45,120,0.08)" : "rgba(255,184,0,0.08)",
               border: `3px solid ${wasCorrect ? "rgba(57,255,20,0.3)" : wasCorrect === false ? "rgba(255,45,120,0.3)" : "rgba(255,184,0,0.3)"}`,
             }}>
             {wasCorrect === true ? (
               <>
-                <CheckCircle2 className="h-10 w-10 shrink-0" style={{ color: "#39FF14" }} />
+                <CheckCircle2 className="h-8 w-8 shrink-0 sm:h-10 sm:w-10" style={{ color: "#39FF14" }} />
                 <div>
-                  <p className="text-2xl font-black uppercase" style={{ color: "#39FF14" }}>Correct!</p>
+                  <p className="text-xl font-black uppercase sm:text-2xl" style={{ color: "#39FF14" }}>Correct!</p>
                   <p className="text-xs font-bold" style={{ color: "rgba(255,255,255,0.4)" }}>{playerStreak >= 2 ? `${playerStreak}x streak bonus!` : "Nice catch!"}</p>
                 </div>
                 <div className="ml-2 flex items-center gap-1">
@@ -549,17 +549,17 @@ function ResultsReveal({ round, room, wasCorrect, playerStreak, showScorePopup, 
               </>
             ) : wasCorrect === false ? (
               <>
-                <XCircle className="h-10 w-10 shrink-0" style={{ color: "#FF2D78" }} />
+                <XCircle className="h-8 w-8 shrink-0 sm:h-10 sm:w-10" style={{ color: "#FF2D78" }} />
                 <div>
-                  <p className="text-2xl font-black uppercase" style={{ color: "#FF2D78" }}>Wrong!</p>
+                  <p className="text-xl font-black uppercase sm:text-2xl" style={{ color: "#FF2D78" }}>Wrong!</p>
                   <p className="text-xs font-bold" style={{ color: "rgba(255,255,255,0.4)" }}>Better luck next round</p>
                 </div>
               </>
             ) : (
               <>
-                <Clock className="h-10 w-10 shrink-0" style={{ color: "#FFB800" }} />
+                <Clock className="h-8 w-8 shrink-0 sm:h-10 sm:w-10" style={{ color: "#FFB800" }} />
                 <div>
-                  <p className="text-2xl font-black uppercase" style={{ color: "#FFB800" }}>{"Time's Up!"}</p>
+                  <p className="text-xl font-black uppercase sm:text-2xl" style={{ color: "#FFB800" }}>{"Time's Up!"}</p>
                   <p className="text-xs font-bold" style={{ color: "rgba(255,255,255,0.4)" }}>No answer submitted</p>
                 </div>
               </>

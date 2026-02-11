@@ -55,22 +55,22 @@ export function LobbyScreen({ room, playerId, isHost, onStartCountdown, onStartG
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4" style={{ background: "var(--cc-dark)" }}>
-      {/* Fixed top-right QR Code card */}
+      {/* QR Code card -- hidden on small mobile, fixed top-right on larger screens */}
       {joinUrl && (
         <div
-          className="fixed right-4 top-4 z-50 flex flex-col items-center gap-2 rounded-2xl border-[3px] p-4 shadow-2xl"
+          className="fixed right-3 top-3 z-50 hidden flex-col items-center gap-1.5 rounded-2xl border-[3px] p-3 shadow-2xl sm:flex sm:right-4 sm:top-4 sm:gap-2 sm:p-4"
           style={{ borderColor: "rgba(0,229,255,0.3)", background: "rgba(11,15,26,0.97)", backdropFilter: "blur(16px)" }}
         >
-          <p className="text-xs font-black tracking-[0.15em] uppercase" style={{ color: "#00E5FF" }}>
+          <p className="text-[10px] font-black tracking-[0.15em] uppercase sm:text-xs" style={{ color: "#00E5FF" }}>
             Join Here!
           </p>
-          <div className="overflow-hidden rounded-xl bg-white p-2">
-            <QRCode value={joinUrl} size={130} />
+          <div className="overflow-hidden rounded-xl bg-white p-1.5 sm:p-2">
+            <QRCode value={joinUrl} size={100} />
           </div>
-          <p className="rounded-lg px-3 py-1 text-sm font-black tracking-[0.25em]" style={{ color: "#00E5FF", background: "rgba(0,229,255,0.08)" }}>
+          <p className="rounded-lg px-2 py-0.5 text-xs font-black tracking-[0.25em] sm:px-3 sm:py-1 sm:text-sm" style={{ color: "#00E5FF", background: "rgba(0,229,255,0.08)" }}>
             {room.id}
           </p>
-          <p className="text-center text-[10px] font-bold" style={{ color: "rgba(255,255,255,0.3)" }}>
+          <p className="text-center text-[9px] font-bold sm:text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>
             Scan with phone camera
           </p>
         </div>
@@ -93,31 +93,31 @@ export function LobbyScreen({ room, playerId, isHost, onStartCountdown, onStartG
         <Sparkles className="absolute right-[40%] top-[10%] h-6 w-6 animate-float opacity-[0.05]" style={{ color: "#A855F7", animationDelay: "1.5s" }} />
       </div>
 
-      <div className="relative z-10 flex w-full max-w-lg flex-col items-center gap-8">
+      <div className="relative z-10 flex w-full max-w-lg flex-col items-center gap-5 sm:gap-8">
         {/* Room code card */}
-        <div className="flex w-full flex-col items-center gap-3">
+        <div className="flex w-full flex-col items-center gap-2 sm:gap-3">
           <div className="flex items-center gap-2">
             <div className="h-1.5 w-1.5 animate-pulse rounded-full" style={{ background: "#39FF14" }} />
-            <p className="text-xs font-black tracking-[0.2em] uppercase" style={{ color: "rgba(255,255,255,0.35)" }}>
+            <p className="text-[10px] font-black tracking-[0.2em] uppercase sm:text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
               Room Code
             </p>
           </div>
           <button
             onClick={copyCode}
-            className="group flex items-center gap-4 rounded-2xl border-[3px] px-8 py-5 transition-all duration-200 hover:border-[#00E5FF]"
+            className="group flex items-center gap-3 rounded-2xl border-[3px] px-5 py-3 transition-all duration-200 hover:border-[#00E5FF] sm:gap-4 sm:px-8 sm:py-5"
             style={{ borderColor: "rgba(0,229,255,0.3)", background: "rgba(0,229,255,0.06)" }}
             aria-label={`Copy room code ${room.id}`}
           >
-            <span className="text-4xl font-black tracking-[0.3em]" style={{ color: "#00E5FF" }}>
+            <span className="text-2xl font-black tracking-[0.3em] sm:text-4xl" style={{ color: "#00E5FF" }}>
               {room.id}
             </span>
             {copied ? (
-              <Check className="h-6 w-6" style={{ color: "#39FF14" }} />
+              <Check className="h-5 w-5 sm:h-6 sm:w-6" style={{ color: "#39FF14" }} />
             ) : (
-              <Copy className="h-6 w-6 transition-transform group-hover:scale-110" style={{ color: "rgba(255,255,255,0.4)" }} />
+              <Copy className="h-5 w-5 transition-transform group-hover:scale-110 sm:h-6 sm:w-6" style={{ color: "rgba(255,255,255,0.4)" }} />
             )}
           </button>
-          <p className="text-sm font-semibold" style={{ color: "rgba(255,255,255,0.35)" }}>
+          <p className="text-xs font-semibold sm:text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>
             {copied ? "Copied!" : "Share this code or scan the QR code"}
           </p>
         </div>
@@ -140,7 +140,7 @@ export function LobbyScreen({ room, playerId, isHost, onStartCountdown, onStartG
               return (
                 <div
                   key={player.id}
-                  className="animate-slide-in-left flex items-center gap-4 rounded-2xl border-[3px] px-5 py-4"
+                  className="animate-slide-in-left flex items-center gap-3 rounded-2xl border-[3px] px-3 py-3 sm:gap-4 sm:px-5 sm:py-4"
                   style={{
                     background: isMe ? `${color}10` : "var(--cc-card)",
                     borderColor: isMe ? `${color}40` : "rgba(255,255,255,0.06)",
@@ -149,16 +149,16 @@ export function LobbyScreen({ room, playerId, isHost, onStartCountdown, onStartG
                 >
                   {/* Avatar */}
                   <div
-                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-lg font-black"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-base font-black sm:h-12 sm:w-12 sm:text-lg"
                     style={{ background: color, color: "var(--cc-dark)" }}
                   >
                     {player.name.charAt(0).toUpperCase()}
                   </div>
 
                   {/* Info */}
-                  <div className="flex-1">
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="text-lg font-black" style={{ color: isMe ? color : "#fff" }}>
+                      <p className="truncate text-base font-black sm:text-lg" style={{ color: isMe ? color : "#fff" }}>
                         {player.name}
                       </p>
                       {isMe && (
@@ -201,8 +201,8 @@ export function LobbyScreen({ room, playerId, isHost, onStartCountdown, onStartG
 
         {/* Countdown or Start button */}
         {isCountdown && countdownDisplay !== null ? (
-          <div className="flex flex-col items-center gap-4">
-            <div className="relative flex h-32 w-32 items-center justify-center">
+          <div className="flex flex-col items-center gap-3 sm:gap-4">
+            <div className="relative flex h-24 w-24 items-center justify-center sm:h-32 sm:w-32">
               <svg className="absolute inset-0 -rotate-90" viewBox="0 0 100 100" aria-hidden="true">
                 <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="6" />
                 <circle
@@ -212,7 +212,7 @@ export function LobbyScreen({ room, playerId, isHost, onStartCountdown, onStartG
                   style={{ transition: "stroke-dasharray 0.3s linear", filter: "drop-shadow(0 0 8px rgba(0,229,255,0.5))" }}
                 />
               </svg>
-              <span className="text-6xl font-black tabular-nums animate-countdown-pulse" style={{ color: "#00E5FF" }}>
+              <span className="text-4xl font-black tabular-nums animate-countdown-pulse sm:text-6xl" style={{ color: "#00E5FF" }}>
                 {countdownDisplay}
               </span>
             </div>
@@ -226,10 +226,10 @@ export function LobbyScreen({ room, playerId, isHost, onStartCountdown, onStartG
           <button
             onClick={onStartCountdown}
             disabled={room.players.length < 1}
-            className="jackbox-btn flex w-full max-w-xs items-center justify-center gap-3 rounded-2xl border-[3px] px-6 py-5 text-xl disabled:opacity-40"
+            className="jackbox-btn flex w-full max-w-xs items-center justify-center gap-3 rounded-2xl border-[3px] px-5 py-4 text-lg disabled:opacity-40 sm:px-6 sm:py-5 sm:text-xl"
             style={{ borderColor: "#39FF14", background: "rgba(57,255,20,0.1)", color: "#39FF14" }}
           >
-            <Zap className="h-6 w-6" />
+            <Zap className="h-5 w-5 sm:h-6 sm:w-6" />
             Start Game
           </button>
         ) : (

@@ -8,11 +8,39 @@ import { GameScreen } from "@/components/cyber-clash/game-screen";
 import { GameOverScreen } from "@/components/cyber-clash/game-over-screen";
 import { LogOut } from "lucide-react";
 
-export default function CyberShieldPage() {
-  const [roomId, setRoomId] = useState<string | null>(null);
-  const [playerId, setPlayerId] = useState<string | null>(null);
+const SESSION_KEY = "cybershield_session";
 
-  const { room, sendAction, departedPlayers, dismissDeparted } = useGameRoom({
+function saveSession(roomId: string | null, playerId: string | null) {
+  try {
+    if (roomId && playerId) {
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify({ roomId, playerId }));
+    } else {
+      sessionStorage.removeItem(SESSION_KEY);
+    }
+  } catch { /* private browsing etc */ }
+}
+
+function loadSession(): { roomId: string; playerId: string } | null {
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (data.roomId && data.playerId) return data;
+  } catch { /* ignore */ }
+  return null;
+}
+
+export default function CyberShieldPage() {
+  const [roomId, setRoomId] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return loadSession()?.roomId ?? null;
+  });
+  const [playerId, setPlayerId] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return loadSession()?.playerId ?? null;
+  });
+
+  const { room, error, sendAction, departedPlayers, dismissDeparted } = useGameRoom({
     roomId,
     playerId,
     enabled: !!roomId && !!playerId,
@@ -27,16 +55,27 @@ export default function CyberShieldPage() {
     return () => timers.forEach(clearTimeout);
   }, [departedPlayers, dismissDeparted]);
 
+  // If the room is not found (stale session), clear and go to join screen
+  useEffect(() => {
+    if (error && roomId && playerId) {
+      setRoomId(null);
+      setPlayerId(null);
+      saveSession(null, null);
+    }
+  }, [error, roomId, playerId]);
+
   const isHost = room ? room.hostId === playerId : false;
 
   const handleCreated = useCallback((newRoomId: string, newPlayerId: string) => {
     setRoomId(newRoomId);
     setPlayerId(newPlayerId);
+    saveSession(newRoomId, newPlayerId);
   }, []);
 
   const handleJoined = useCallback((newRoomId: string, newPlayerId: string) => {
     setRoomId(newRoomId);
     setPlayerId(newPlayerId);
+    saveSession(newRoomId, newPlayerId);
   }, []);
 
   const handleStartCountdown = useCallback(() => {
@@ -74,6 +113,7 @@ export default function CyberShieldPage() {
     await sendAction("leave");
     setRoomId(null);
     setPlayerId(null);
+    saveSession(null, null);
   }, [sendAction]);
 
   // No room yet -- show join screen
