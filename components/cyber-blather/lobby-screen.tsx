@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Copy, Check, Users, Zap, Crown, Loader2, MessageSquare, Brain, QrCode, Shield } from "lucide-react";
 import type { BlatherRoom } from "@/lib/blather-room";
-import { QRCode } from "@/components/cyber-clash/qr-code";
+import { QRCode } from "@/components/qr-code";
 
 const AVATAR_COLORS = ["#FFB800", "#00E5FF", "#39FF14", "#FF2D78", "#A855F7", "#F97316", "#06B6D4", "#EC4899"];
 const PUBLIC_DOMAIN = "https://cybertrain.work";
@@ -21,7 +21,7 @@ export function BlatherLobbyScreen({ room, playerId, isHost, onStartCountdown, o
   const [countdownDisplay, setCountdownDisplay] = useState<number | null>(null);
   const [showQR, setShowQR] = useState(false);
 
-  const joinUrl = `${PUBLIC_DOMAIN}/blather?blather=${room.id}`;
+  const joinUrl = `${PUBLIC_DOMAIN}/?code=${room.id}`;
 
   const copyCode = useCallback(async () => {
     try {

@@ -9,28 +9,27 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CyberShield - Cyber Security Party Games",
+  title: "CyberBlather - Cybersecurity Word Guessing Party Game",
   description:
-    "Real-time multiplayer party games for cybersecurity awareness. Spot phishing emails, describe cyber terms, rate passwords, and outscore your opponents.",
+    "A multiplayer party game where players describe cybersecurity terms using sentence templates while others race to guess. Learn about phishing, encryption, and more through play.",
   keywords: [
     "cybersecurity",
-    "phishing",
-    "game",
-    "training",
-    "multiplayer",
-    "party game",
-    "cybershield",
     "cyberblather",
     "blather round",
+    "word guessing",
+    "party game",
+    "multiplayer",
+    "training",
+    "security awareness",
   ],
-  authors: [{ name: "CyberShield" }],
+  authors: [{ name: "CyberBlather" }],
   openGraph: {
     type: "website",
     locale: "en_US",
-    siteName: "CyberShield",
-    title: "CyberShield - Cyber Security Party Games",
+    siteName: "CyberBlather",
+    title: "CyberBlather - Cybersecurity Word Guessing Party Game",
     description:
-      "Real-time multiplayer party games for cybersecurity awareness training",
+      "Describe cybersecurity terms, guess what others describe, and learn through play in this multiplayer party game.",
   },
   robots: { index: true, follow: true },
 };

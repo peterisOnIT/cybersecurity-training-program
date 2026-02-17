@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { heartbeat } from "@/lib/blather-room";
+import { heartbeat, getRoom } from "@/lib/blather-room";
 
 export async function POST(req: Request) {
   try {
@@ -9,7 +9,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing roomId or playerId" }, { status: 400 });
     }
 
-    const room = await heartbeat(roomId, playerId);
+    // Try heartbeat first, but fall back to a read-only getRoom if the player
+    // isn't registered yet (brief race between join completing and first poll).
+    let room = await heartbeat(roomId, playerId);
+    if (!room) {
+      room = await getRoom(roomId);
+    }
 
     if (!room) {
       return NextResponse.json({ error: "Room not found" }, { status: 404 });
@@ -17,13 +22,13 @@ export async function POST(req: Request) {
 
     // Strip the secret word from non-describer players during active play
     const safeRoom = { ...room };
-    if (room.status === "describing") {
+    if (room.status === "describing" || room.status === "round_results") {
       const currentRound = room.rounds[room.currentRound];
       if (currentRound && currentRound.describerId !== playerId) {
-        // Hide the word bank entries that haven't been played yet
+        // Hide all unplayed words and taboo words from guessers
         safeRoom.wordBank = room.wordBank.map((w, i) => {
           if (i >= room.currentRound) {
-            return { ...w, word: "???" };
+            return { ...w, word: "???", tabooWords: [] };
           }
           return w;
         });

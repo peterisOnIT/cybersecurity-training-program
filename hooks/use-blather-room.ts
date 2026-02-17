@@ -22,6 +22,7 @@ export function useBlatherRoom({ roomId, playerId, enabled = true }: UseBlatherR
   const [departedPlayers, setDepartedPlayers] = useState<DepartedPlayer[]>([]);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const prevPlayerIdsRef = useRef<Map<string, string>>(new Map());
+  const errorCountRef = useRef(0);
 
   const poll = useCallback(async () => {
     if (!roomId || !playerId) return;
@@ -32,10 +33,17 @@ export function useBlatherRoom({ roomId, playerId, enabled = true }: UseBlatherR
         body: JSON.stringify({ roomId, playerId }),
       });
       if (!res.ok) {
-        const data = await res.json();
-        setError(data.error || "Room not found");
+        errorCountRef.current += 1;
+        // Only set a fatal error after 5 consecutive failures
+        if (errorCountRef.current >= 5) {
+          const data = await res.json().catch(() => ({ error: "Room not found" }));
+          setError(data.error || "Room not found");
+        }
         return;
       }
+
+      // Success -- reset error counter
+      errorCountRef.current = 0;
       const data = await res.json();
       const newRoom = data.room as BlatherRoom;
 
@@ -60,14 +68,19 @@ export function useBlatherRoom({ roomId, playerId, enabled = true }: UseBlatherR
       setRoom(newRoom);
       setError(null);
     } catch {
-      setError("Connection lost");
+      errorCountRef.current += 1;
+      if (errorCountRef.current >= 5) {
+        setError("Connection lost");
+      }
     }
   }, [roomId, playerId]);
 
   useEffect(() => {
     if (!enabled || !roomId || !playerId) return;
+    // Reset error count when starting fresh
+    errorCountRef.current = 0;
     poll();
-    intervalRef.current = setInterval(poll, 1000);
+    intervalRef.current = setInterval(poll, 1500);
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };

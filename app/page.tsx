@@ -1,15 +1,15 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { useGameRoom } from "@/hooks/use-game-room";
-import { JoinScreen } from "@/components/cyber-clash/join-screen";
-import { LobbyScreen } from "@/components/cyber-clash/lobby-screen";
-import { GameScreen } from "@/components/cyber-clash/game-screen";
-import { GameOverScreen } from "@/components/cyber-clash/game-over-screen";
+import { useBlatherRoom } from "@/hooks/use-blather-room";
+import { BlatherJoinScreen } from "@/components/cyber-blather/join-screen";
+import { BlatherLobbyScreen } from "@/components/cyber-blather/lobby-screen";
+import { BlatherGameScreen } from "@/components/cyber-blather/game-screen";
+import { BlatherGameOverScreen } from "@/components/cyber-blather/game-over-screen";
 import { LogOut } from "lucide-react";
 
-const SESSION_KEY_ROOM = "cybershield_roomId";
-const SESSION_KEY_PLAYER = "cybershield_playerId";
+const SESSION_KEY_ROOM = "cyberblather_roomId";
+const SESSION_KEY_PLAYER = "cyberblather_playerId";
 
 function getSessionValue(key: string): string | null {
   if (typeof window === "undefined") return null;
@@ -20,42 +20,38 @@ function getSessionValue(key: string): string | null {
   }
 }
 
-export default function CyberShieldPage() {
+export default function CyberBlatherPage() {
   const [roomId, setRoomId] = useState<string | null>(() => getSessionValue(SESSION_KEY_ROOM));
   const [playerId, setPlayerId] = useState<string | null>(() => getSessionValue(SESSION_KEY_PLAYER));
-  // Persist roomId and playerId to sessionStorage
+
   useEffect(() => {
     try {
-      if (roomId) {
-        sessionStorage.setItem(SESSION_KEY_ROOM, roomId);
-      } else {
-        sessionStorage.removeItem(SESSION_KEY_ROOM);
-      }
-      if (playerId) {
-        sessionStorage.setItem(SESSION_KEY_PLAYER, playerId);
-      } else {
-        sessionStorage.removeItem(SESSION_KEY_PLAYER);
-      }
-    } catch {
-      // sessionStorage unavailable
-    }
+      if (roomId) sessionStorage.setItem(SESSION_KEY_ROOM, roomId);
+      else sessionStorage.removeItem(SESSION_KEY_ROOM);
+      if (playerId) sessionStorage.setItem(SESSION_KEY_PLAYER, playerId);
+      else sessionStorage.removeItem(SESSION_KEY_PLAYER);
+    } catch { /* noop */ }
   }, [roomId, playerId]);
 
-  const { room, error, sendAction, departedPlayers, dismissDeparted } = useGameRoom({
+  const { room, error, sendAction, departedPlayers, dismissDeparted } = useBlatherRoom({
     roomId,
     playerId,
     enabled: !!roomId && !!playerId,
   });
 
-  // If we restored from session but room no longer exists, clear state and go to join
+  // Only reset session when we get a persistent "Room not found" error
+  // (the hook requires 5 consecutive failures before setting error)
   useEffect(() => {
-    if (error && roomId && playerId) {
+    if (error === "Room not found" && roomId && playerId) {
       setRoomId(null);
       setPlayerId(null);
+      try {
+        sessionStorage.removeItem(SESSION_KEY_ROOM);
+        sessionStorage.removeItem(SESSION_KEY_PLAYER);
+      } catch { /* noop */ }
     }
   }, [error, roomId, playerId]);
 
-  // Auto-dismiss departure toasts after 4 seconds
   useEffect(() => {
     if (departedPlayers.length === 0) return;
     const timers = departedPlayers.map((d) =>
@@ -84,47 +80,21 @@ export default function CyberShieldPage() {
     sendAction("start_game");
   }, [sendAction]);
 
-  const handleAnswer = useCallback(
-    (answer: number) => {
-      if (!room) return;
-      sendAction("submit_answer", {
-        questionIndex: room.currentQuestion,
-        answer,
-      });
-    },
-    [sendAction, room]
-  );
-
-  const handleBattleSubmit = useCallback(
-    (password: string) => {
-      if (!room) return;
-      sendAction("battle_submit", {
-        questionIndex: room.currentQuestion,
-        password,
-      });
-    },
-    [sendAction, room]
-  );
-
-  const handleShowResults = useCallback(() => {
-    sendAction("show_results");
+  const handleSendSentence = useCallback((template: string, filled: string) => {
+    sendAction("send_sentence", { template, filled });
   }, [sendAction]);
 
-  const handleNextQuestion = useCallback(() => {
-    sendAction("next_question");
+  const handleSubmitGuess = useCallback((guess: string) => {
+    sendAction("submit_guess", { guess });
   }, [sendAction]);
 
-  // Safety net: if stuck on showing_results for too long and we're host, auto-advance
-  const staleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => {
-    if (staleTimerRef.current) { clearTimeout(staleTimerRef.current); staleTimerRef.current = null; }
-    if (room?.status === "showing_results" && isHost) {
-      staleTimerRef.current = setTimeout(() => {
-        sendAction("next_question");
-      }, 12000);
-    }
-    return () => { if (staleTimerRef.current) clearTimeout(staleTimerRef.current); };
-  }, [room?.status, room?.currentQuestion, isHost, sendAction]);
+  const handleEndRound = useCallback(() => {
+    sendAction("end_round");
+  }, [sendAction]);
+
+  const handleNextRound = useCallback(() => {
+    sendAction("next_round");
+  }, [sendAction]);
 
   const handlePlayAgain = useCallback(() => {
     sendAction("reset");
@@ -137,25 +107,35 @@ export default function CyberShieldPage() {
     try {
       sessionStorage.removeItem(SESSION_KEY_ROOM);
       sessionStorage.removeItem(SESSION_KEY_PLAYER);
-    } catch {
-      // ignore
-    }
+    } catch { /* noop */ }
   }, [sendAction]);
 
-  // No room yet -- show join screen
+  // Auto-advance from round_results after 15s if host
+  const staleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (staleTimerRef.current) { clearTimeout(staleTimerRef.current); staleTimerRef.current = null; }
+    if (room?.status === "round_results" && isHost) {
+      staleTimerRef.current = setTimeout(() => {
+        sendAction("next_round");
+      }, 15000);
+    }
+    return () => { if (staleTimerRef.current) clearTimeout(staleTimerRef.current); };
+  }, [room?.status, room?.currentRound, isHost, sendAction]);
+
+  // No room yet
   if (!room || !roomId || !playerId) {
     return (
       <main id="main-content" className="min-h-dvh" style={{ background: "var(--cc-dark)" }}>
-        <JoinScreen onCreated={handleCreated} onJoined={handleJoined} />
+        <BlatherJoinScreen onCreated={handleCreated} onJoined={handleJoined} />
       </main>
     );
   }
 
   return (
     <main id="main-content" className="min-h-dvh" style={{ background: "var(--cc-dark)" }}>
-      {/* Waiting / Countdown */}
+      {/* Lobby */}
       {(room.status === "waiting" || room.status === "countdown") && (
-        <LobbyScreen
+        <BlatherLobbyScreen
           room={room}
           playerId={playerId}
           isHost={isHost}
@@ -164,23 +144,24 @@ export default function CyberShieldPage() {
         />
       )}
 
-      {/* Playing / Showing Results */}
-      {(room.status === "playing" || room.status === "showing_results") && (
-        <GameScreen
+      {/* Active game */}
+      {(room.status === "describing" || room.status === "round_results") && (
+        <BlatherGameScreen
           room={room}
           playerId={playerId}
           isHost={isHost}
-          onAnswer={handleAnswer}
-          onBattleSubmit={handleBattleSubmit}
-          onShowResults={handleShowResults}
-          onNextQuestion={handleNextQuestion}
+          onSendSentence={handleSendSentence}
+          onSubmitGuess={handleSubmitGuess}
+          onEndRound={handleEndRound}
+          onNextRound={handleNextRound}
         />
       )}
 
       {/* Game Over */}
       {room.status === "game_over" && (
-        <GameOverScreen
+        <BlatherGameOverScreen
           players={room.players}
+          allPlayers={room.players}
           myPlayerId={playerId}
           isHost={isHost}
           onPlayAgain={handlePlayAgain}
@@ -188,18 +169,17 @@ export default function CyberShieldPage() {
         />
       )}
 
-      {/* Player departure toasts */}
+      {/* Departure toasts */}
       {departedPlayers.length > 0 && (
         <div className="fixed top-4 left-1/2 z-50 flex w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 flex-col gap-2 sm:top-6">
           {departedPlayers.map((d) => (
             <div
               key={d.id}
-              className="animate-pop-in flex items-center gap-3 rounded-2xl border-[3px] px-4 py-3 shadow-2xl sm:px-5 sm:py-4"
+              className="animate-pop-in flex items-center gap-3 rounded-2xl border-[3px] px-4 py-3 shadow-2xl"
               style={{
                 background: "rgba(11,15,26,0.97)",
                 borderColor: "rgba(255,45,120,0.4)",
                 backdropFilter: "blur(16px)",
-                boxShadow: "0 0 30px rgba(255,45,120,0.15), 0 8px 32px rgba(0,0,0,0.5)",
               }}
             >
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ background: "rgba(255,45,120,0.15)" }}>
@@ -209,11 +189,10 @@ export default function CyberShieldPage() {
                 <p className="text-sm font-black" style={{ color: "#fff" }}>
                   <span style={{ color: "#FF2D78" }}>{d.name}</span>{" left the game"}
                 </p>
-                <p className="text-[10px] font-bold" style={{ color: "rgba(255,255,255,0.35)" }}>Player disconnected</p>
               </div>
               <button
                 onClick={() => dismissDeparted(d.id)}
-                className="shrink-0 rounded-lg px-2.5 py-1 text-[10px] font-black uppercase tracking-wider transition-all duration-200 hover:bg-white/10"
+                className="shrink-0 rounded-lg px-2.5 py-1 text-[10px] font-black uppercase tracking-wider transition-all hover:bg-white/10"
                 style={{ color: "rgba(255,255,255,0.4)", border: "1px solid rgba(255,255,255,0.1)" }}
                 aria-label={`Dismiss notification for ${d.name}`}
               >

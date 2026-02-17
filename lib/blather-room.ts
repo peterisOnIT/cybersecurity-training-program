@@ -376,10 +376,13 @@ export async function heartbeat(roomId: string, playerId: string): Promise<Blath
   if (!room) return null;
 
   const player = room.players.find((p) => p.id === playerId);
-  if (player) {
-    player.connected = true;
+  if (!player) {
+    // Player not in the room -- don't fail, just return null so the
+    // poll route can fall back to a read-only getRoom.
+    return null;
   }
 
+  player.connected = true;
   await redis.set(redisKey(roomId), room, { ex: ROOM_TTL });
   return room;
 }
@@ -465,16 +468,20 @@ export async function submitGuess(
 
   // Check if guess is correct
   const word = room.wordBank[round.wordIndex];
-  const normalizedGuess = guess.toLowerCase().trim();
-  const normalizedWord = word.word.toLowerCase().trim();
+  const normalizedGuess = guess.toLowerCase().trim().replace(/[^a-z0-9\s]/g, "");
+  const normalizedWord = word.word.toLowerCase().trim().replace(/[^a-z0-9\s]/g, "");
 
   // Store the guess
   player.guesses.push(guess);
 
+  // Check multiple matching strategies for flexibility
   const isCorrect =
     normalizedGuess === normalizedWord ||
     normalizedGuess.includes(normalizedWord) ||
-    normalizedWord.includes(normalizedGuess);
+    normalizedWord.includes(normalizedGuess) ||
+    // Handle cases like "2fa" matching "twofactor authentication"
+    (normalizedGuess.length >= 3 && normalizedWord.split(" ").some(w => w === normalizedGuess)) ||
+    (normalizedGuess.length >= 3 && normalizedGuess.split(" ").some(w => normalizedWord.split(" ").some(nw => nw === w && w.length >= 4)));
 
   if (isCorrect) {
     player.hasGuessedCorrectly = true;

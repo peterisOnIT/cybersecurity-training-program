@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Shield, Users, Zap, ArrowLeft, MessageSquare, Eye, Brain, Terminal, ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { Shield, Users, Zap, ArrowLeft, MessageSquare, Eye, Brain, Terminal } from "lucide-react";
 
 interface JoinScreenProps {
   onCreated: (roomId: string, playerId: string) => void;
@@ -18,7 +17,7 @@ export function BlatherJoinScreen({ onCreated, onJoined }: JoinScreenProps) {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const code = params.get("blather");
+    const code = params.get("code") || params.get("blather");
     if (code && code.length === 5) {
       setRoomCode(code.toUpperCase());
       setMode("join");
@@ -251,16 +250,7 @@ export function BlatherJoinScreen({ onCreated, onJoined }: JoinScreenProps) {
           </div>
         )}
 
-        {/* Switch to other game */}
-        <Link
-          href="/"
-          className="flex items-center gap-2 rounded-full border-[2px] px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-200 hover:border-[#00E5FF] hover:text-[#00E5FF]"
-          style={{ borderColor: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.35)" }}
-        >
-          <Shield className="h-3.5 w-3.5" />
-          Play CyberShield instead
-          <ArrowRight className="h-3 w-3" />
-        </Link>
+
       </div>
     </div>
   );
