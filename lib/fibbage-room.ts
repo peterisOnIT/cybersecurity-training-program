@@ -568,6 +568,95 @@ export async function advancePhase(roomId: string, playerId: string): Promise<Fi
   return room;
 }
 
+/**
+ * Auto-advance any timed phase that has expired.
+ * This prevents the game from getting stuck when players disconnect/refresh
+ * during a timed phase and no host manually advances.
+ */
+export async function autoAdvanceIfExpired(roomId: string): Promise<FibbageRoom | null> {
+  const room = await getRoom(roomId);
+  if (!room) return null;
+  if (!room.phaseEndsAt) return null;
+  if (Date.now() < room.phaseEndsAt) return null; // not expired yet
+
+  if (room.status === "countdown") {
+    // Transition countdown -> writing
+    room.status = "writing";
+    room.currentRound = 0;
+    room.phaseEndsAt = Date.now() + WRITING_TIME * 1000;
+    room.rounds = [
+      {
+        questionIndex: 0,
+        answers: [],
+        votes: {},
+        revealed: false,
+      },
+    ];
+    if (room.questions.length === 0) {
+      room.totalRounds = Math.min(5, QUESTION_BANK.length);
+      room.questions = selectQuestions(room.totalRounds);
+    }
+    room.players.forEach((p) => {
+      p.lie = null;
+      p.votedFor = null;
+    });
+    await redis.set(redisKey(roomId), room, { ex: ROOM_TTL });
+    return room;
+  }
+
+  if (room.status === "writing") {
+    // Force transition to voting - give default lies for anyone who didn't submit
+    room.players.forEach((p) => {
+      if (p.lie === null) {
+        p.lie = "No answer";
+      }
+    });
+    transitionToVoting(room);
+    await redis.set(redisKey(roomId), room, { ex: ROOM_TTL });
+    return room;
+  }
+
+  if (room.status === "voting") {
+    // Force transition to reveal
+    transitionToReveal(room);
+    await redis.set(redisKey(roomId), room, { ex: ROOM_TTL });
+    return room;
+  }
+
+  if (room.status === "reveal") {
+    room.status = "scores";
+    room.phaseEndsAt = Date.now() + SCORES_TIME * 1000;
+    await redis.set(redisKey(roomId), room, { ex: ROOM_TTL });
+    return room;
+  }
+
+  if (room.status === "scores") {
+    const nextRound = room.currentRound + 1;
+    if (nextRound >= room.totalRounds) {
+      room.status = "game_over";
+      room.phaseEndsAt = null;
+    } else {
+      room.currentRound = nextRound;
+      room.status = "writing";
+      room.phaseEndsAt = Date.now() + WRITING_TIME * 1000;
+      room.rounds.push({
+        questionIndex: nextRound,
+        answers: [],
+        votes: {},
+        revealed: false,
+      });
+      room.players.forEach((p) => {
+        p.lie = null;
+        p.votedFor = null;
+      });
+    }
+    await redis.set(redisKey(roomId), room, { ex: ROOM_TTL });
+    return room;
+  }
+
+  return null;
+}
+
 export async function playAgain(roomId: string, playerId: string): Promise<FibbageRoom | null> {
   const room = await getRoom(roomId);
   if (!room) return null;

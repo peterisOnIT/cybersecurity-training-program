@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { heartbeat, getRoom } from "@/lib/fibbage-room";
+import { heartbeat, getRoom, autoAdvanceIfExpired } from "@/lib/fibbage-room";
 
 export async function POST(req: Request) {
   try {
@@ -18,6 +18,9 @@ export async function POST(req: Request) {
     if (!room) {
       return NextResponse.json({ error: "Room not found" }, { status: 404 });
     }
+
+    // Auto-advance phases that have expired (prevents stuck games on disconnect/refresh)
+    room = await autoAdvanceIfExpired(roomId) || room;
 
     // Build a safe copy -- hide lies during writing phase, hide truth author during voting
     const safeRoom = JSON.parse(JSON.stringify(room));

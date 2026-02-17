@@ -22,7 +22,6 @@ export function LobbyScreen({ room, playerId, onStart, loading, sfx }: LobbyScre
   const isHost = room.hostId === playerId;
   const joinUrl = `${PUBLIC_DOMAIN}/?code=${room.id}`;
   const prevPlayerCount = useRef(room.players.length);
-  const prevCountdown = useRef<number | null>(null);
 
   // Play sound when new player joins
   useEffect(() => {
@@ -44,14 +43,6 @@ export function LobbyScreen({ room, playerId, onStart, loading, sfx }: LobbyScre
     }
     setCountdown(null);
   }, [room.status, room.phaseEndsAt]);
-
-  // Play countdown sounds
-  useEffect(() => {
-    if (countdown !== null && countdown > 0 && countdown !== prevCountdown.current) {
-      sfx.play(countdown <= 1 ? "countdownFinal" : "countdown");
-    }
-    prevCountdown.current = countdown;
-  }, [countdown, sfx]);
 
   const copyCode = () => {
     navigator.clipboard.writeText(room.id);

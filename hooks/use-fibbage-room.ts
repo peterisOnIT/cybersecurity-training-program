@@ -26,7 +26,7 @@ export function useFibbageRoom({ roomId, playerId, enabled = true }: UseFibbageR
       });
       if (!res.ok) {
         errorCountRef.current += 1;
-        if (errorCountRef.current >= 5) {
+        if (errorCountRef.current >= 15) {
           const data = await res.json().catch(() => ({ error: "Room not found" }));
           setError(data.error || "Room not found");
         }
@@ -39,7 +39,7 @@ export function useFibbageRoom({ roomId, playerId, enabled = true }: UseFibbageR
       setError(null);
     } catch {
       errorCountRef.current += 1;
-      if (errorCountRef.current >= 5) {
+      if (errorCountRef.current >= 15) {
         setError("Connection lost");
       }
     }
