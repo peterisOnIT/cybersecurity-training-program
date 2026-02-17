@@ -5,8 +5,7 @@ import type { FibbageRoom } from "@/lib/fibbage-room";
 import { QRCode } from "@/components/qr-code";
 import { Copy, Check, Users, Zap, Crown, Skull } from "lucide-react";
 
-const PUBLIC_DOMAIN =
-  typeof window !== "undefined" ? window.location.origin : "https://cybertrain.work";
+const PUBLIC_DOMAIN = "https://cybertrain.work";
 
 interface LobbyScreenProps {
   room: FibbageRoom;
