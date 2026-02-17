@@ -89,7 +89,7 @@ export function JoinScreen({ onCreated, onJoined }: JoinScreenProps) {
             className="max-w-xs text-center text-sm font-medium leading-relaxed"
             style={{ color: "rgba(255,255,255,0.5)" }}
           >
-            Write convincing lies about cybersecurity. Fool your friends. Find the truth.
+            Can you spot the real answer? Make up your own and see who falls for it!
           </p>
         </div>
 
@@ -110,10 +110,10 @@ export function JoinScreen({ onCreated, onJoined }: JoinScreenProps) {
             </p>
             <div className="flex flex-col gap-2.5">
               {[
-                { icon: HelpCircle, color: "#00E5FF", text: "Read a cybersecurity question with a blank" },
-                { icon: Skull, color: "#FF2D78", text: "Write a fake answer to trick other players" },
-                { icon: Users, color: "#FFB800", text: "Vote on which answer you think is real" },
-                { icon: Trophy, color: "#39FF14", text: "Score points for guessing right AND fooling others" },
+                { icon: HelpCircle, color: "#00E5FF", text: "Read a cybersecurity question with a missing word" },
+                { icon: Skull, color: "#FF2D78", text: "Make up a fake answer that sounds real" },
+                { icon: Users, color: "#FFB800", text: "Vote on which answer you think is correct" },
+                { icon: Trophy, color: "#39FF14", text: "Earn points for guessing right AND tricking others" },
               ].map((step, i) => (
                 <div
                   key={i}

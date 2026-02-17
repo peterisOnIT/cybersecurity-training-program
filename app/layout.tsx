@@ -9,9 +9,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CyberFib - Cybersecurity Fibbage Party Game",
+  title: "CyberFib - Cybersecurity Guessing Game for Kids",
   description:
-    "A multiplayer party game where players write fake answers to cybersecurity trivia, then everyone votes on which answer is real. Fool your friends and learn about security!",
+    "A fun multiplayer party game where kids make up fake answers to cybersecurity questions, then everyone votes on which one is real. Learn online safety while having a blast!",
   keywords: [
     "cybersecurity",
     "fibbage",
@@ -19,18 +19,20 @@ export const metadata: Metadata = {
     "trivia",
     "party game",
     "multiplayer",
-    "training",
+    "kids",
+    "K-12",
+    "online safety",
     "security awareness",
-    "bluffing game",
+    "educational game",
   ],
   authors: [{ name: "CyberFib" }],
   openGraph: {
     type: "website",
     locale: "en_US",
     siteName: "CyberFib",
-    title: "CyberFib - Cybersecurity Fibbage Party Game",
+    title: "CyberFib - Cybersecurity Guessing Game for Kids",
     description:
-      "Write convincing lies about cybersecurity. Fool your friends. Find the truth. A multiplayer party game for security awareness.",
+      "Can you spot the real answer? Make up your own and see who falls for it! A fun multiplayer game to learn about online safety.",
   },
   robots: { index: true, follow: true },
 };

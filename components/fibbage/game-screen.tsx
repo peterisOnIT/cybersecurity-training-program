@@ -112,14 +112,14 @@ function WritingPhase({ room, playerId, sendAction, loading }: GameScreenProps) 
               style={{ color: "rgba(255,255,255,0.3)" }}
               htmlFor="lie-input"
             >
-              Your fake answer
+              Your made-up answer
             </label>
             <input
               id="lie-input"
               type="text"
               value={lie}
               onChange={(e) => setLie(e.target.value.slice(0, 60))}
-              placeholder="Write something believable..."
+              placeholder="Type your made-up answer..."
               maxLength={60}
               autoFocus
               className="rounded-xl border-[2px] px-4 py-3.5 font-bold placeholder:font-normal focus:outline-none"
@@ -137,7 +137,7 @@ function WritingPhase({ room, playerId, sendAction, loading }: GameScreenProps) 
                 className="text-xs"
                 style={{ color: "rgba(255,255,255,0.2)" }}
               >
-                Make it convincing!
+                Make it sound real!
               </span>
               <span
                 className="font-mono text-xs"
@@ -158,7 +158,7 @@ function WritingPhase({ room, playerId, sendAction, loading }: GameScreenProps) 
             }}
           >
             <Send className="h-4 w-4" />
-            Submit Lie
+            Submit Answer
           </button>
         </div>
       ) : (
@@ -168,7 +168,7 @@ function WritingPhase({ room, playerId, sendAction, loading }: GameScreenProps) 
         >
           <Check className="h-8 w-8" style={{ color: "#39FF14" }} />
           <p className="font-bold" style={{ color: "#39FF14" }}>
-            Lie submitted!
+            Answer submitted!
           </p>
           <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>
             Waiting for others... ({submittedCount}/{room.players.length})
@@ -292,7 +292,7 @@ function VotingPhase({ room, playerId, sendAction, loading }: GameScreenProps) {
                 <span>{answer.text}</span>
                 {isMyLie && (
                   <span className="shrink-0 text-xs font-normal" style={{ color: "rgba(255,255,255,0.2)" }}>
-                    Your lie
+                    Yours
                   </span>
                 )}
                 {isSelected && <Check className="h-4 w-4 shrink-0" style={{ color: "#00E5FF" }} />}
@@ -405,7 +405,7 @@ function RevealPhase({ room, playerId, sendAction, loading }: GameScreenProps) {
                         color: isTruth ? "#39FF14" : "#FF2D78",
                       }}
                     >
-                      {voter.name} {isTruth ? "+1000" : "fooled!"}
+                      {voter.name} {isTruth ? "+1000" : "tricked!"}
                     </span>
                   ))}
                 </div>
@@ -513,7 +513,7 @@ function ScoresPhase({ room, playerId, sendAction, loading }: GameScreenProps) {
                 </span>
                 {player.totalFools > 0 && (
                   <span className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
-                    Fooled {player.totalFools} {player.totalFools === 1 ? "player" : "players"}
+                    Tricked {player.totalFools} {player.totalFools === 1 ? "player" : "players"}
                   </span>
                 )}
               </div>
@@ -595,7 +595,7 @@ function GameOverPhase({ room, playerId, sendAction, loading }: GameScreenProps)
                 {player.name}
               </span>
               <span className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
-                Fooled {player.totalFools} total
+                Tricked {player.totalFools} total
               </span>
             </div>
             <span
@@ -608,23 +608,23 @@ function GameOverPhase({ room, playerId, sendAction, loading }: GameScreenProps)
         ))}
       </div>
 
-      {/* Best liar award */}
+      {/* Master of Disguise award */}
       {(() => {
-        const bestLiar = [...room.players].sort((a, b) => b.totalFools - a.totalFools)[0];
-        if (bestLiar.totalFools > 0) {
+        const bestTrickster = [...room.players].sort((a, b) => b.totalFools - a.totalFools)[0];
+        if (bestTrickster.totalFools > 0) {
           return (
             <div
               className="w-full rounded-xl border-[2px] p-4 text-center animate-fade-in"
               style={{ borderColor: "rgba(255,45,120,0.2)", background: "rgba(255,45,120,0.05)" }}
             >
               <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "#FF2D78" }}>
-                Best Liar Award
+                Master of Disguise
               </p>
               <p className="mt-1 text-lg font-black" style={{ color: "#FF2D78" }}>
-                {bestLiar.name}
+                {bestTrickster.name}
               </p>
               <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
-                Fooled {bestLiar.totalFools} {bestLiar.totalFools === 1 ? "player" : "players"} total
+                Tricked {bestTrickster.totalFools} {bestTrickster.totalFools === 1 ? "player" : "players"} total
               </p>
             </div>
           );

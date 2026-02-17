@@ -24,7 +24,7 @@ export async function POST(req: Request) {
         break;
       case "submit_lie":
         if (!body.lie || typeof body.lie !== "string") {
-          return NextResponse.json({ error: "Lie is required" }, { status: 400 });
+          return NextResponse.json({ error: "Answer is required" }, { status: 400 });
         }
         room = await submitLie(roomId, playerId, body.lie);
         break;
