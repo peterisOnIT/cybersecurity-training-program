@@ -16,11 +16,11 @@ export default function CyberFibPage() {
   const [playerId, setPlayerId] = useState<string | null>(null);
   const sfx = useSoundEffects();
 
-  // Restore session from sessionStorage
+  // Restore session from localStorage (survives page refresh on mobile)
   useEffect(() => {
     try {
-      const storedRoom = sessionStorage.getItem(SESSION_KEY_ROOM);
-      const storedPlayer = sessionStorage.getItem(SESSION_KEY_PLAYER);
+      const storedRoom = localStorage.getItem(SESSION_KEY_ROOM);
+      const storedPlayer = localStorage.getItem(SESSION_KEY_PLAYER);
       if (storedRoom && storedPlayer) {
         setRoomId(storedRoom);
         setPlayerId(storedPlayer);
@@ -32,8 +32,8 @@ export default function CyberFibPage() {
   useEffect(() => {
     try {
       if (roomId && playerId) {
-        sessionStorage.setItem(SESSION_KEY_ROOM, roomId);
-        sessionStorage.setItem(SESSION_KEY_PLAYER, playerId);
+        localStorage.setItem(SESSION_KEY_ROOM, roomId);
+        localStorage.setItem(SESSION_KEY_PLAYER, playerId);
       }
     } catch { /* noop */ }
   }, [roomId, playerId]);
@@ -50,8 +50,8 @@ export default function CyberFibPage() {
       setRoomId(null);
       setPlayerId(null);
       try {
-        sessionStorage.removeItem(SESSION_KEY_ROOM);
-        sessionStorage.removeItem(SESSION_KEY_PLAYER);
+        localStorage.removeItem(SESSION_KEY_ROOM);
+        localStorage.removeItem(SESSION_KEY_PLAYER);
       } catch { /* noop */ }
     }
   }, [error, roomId, playerId]);

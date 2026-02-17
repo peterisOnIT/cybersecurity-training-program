@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { FibbageRoom, AnswerOption, FibbagePlayer } from "@/lib/fibbage-room";
 import type { useSoundEffects } from "@/hooks/use-sound-effects";
 import {
   Send,
-  Clock,
   Check,
   HelpCircle,
   Trophy,
@@ -17,8 +16,6 @@ import {
   Target,
   Users,
   Lightbulb,
-  Volume2,
-  VolumeX,
   Shield,
   Sparkles,
 } from "lucide-react";
@@ -93,15 +90,6 @@ function WritingPhase({ room, playerId, sendAction, loading, sfx }: GameScreenPr
   const question = room.questions[room.currentRound];
   const me = room.players.find((p) => p.id === playerId);
   const submittedCount = room.players.filter((p) => p.lie !== null).length;
-  const prevTimerRef = useRef(timer);
-
-  // Sound on timer tick for last 5 seconds
-  useEffect(() => {
-    if (timer !== prevTimerRef.current && timer > 0 && timer <= 5) {
-      sfx.play(timer === 1 ? "countdownFinal" : "countdown");
-    }
-    prevTimerRef.current = timer;
-  }, [timer, sfx]);
 
   // Play round start sound
   useEffect(() => {
@@ -253,14 +241,6 @@ function VotingPhase({ room, playerId, sendAction, loading, sfx }: GameScreenPro
   const round = room.rounds[room.currentRound];
   const me = room.players.find((p) => p.id === playerId);
   const votedCount = room.players.filter((p) => p.votedFor !== null).length;
-  const prevTimerRef = useRef(timer);
-
-  useEffect(() => {
-    if (timer !== prevTimerRef.current && timer > 0 && timer <= 5) {
-      sfx.play(timer === 1 ? "countdownFinal" : "tick");
-    }
-    prevTimerRef.current = timer;
-  }, [timer, sfx]);
 
   useEffect(() => {
     sfx.play("whoosh");
