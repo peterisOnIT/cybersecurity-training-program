@@ -8,14 +8,11 @@ type SoundName =
   | "correct"
   | "wrong"
   | "reveal"
-  | "countdown"
-  | "countdownFinal"
   | "gameStart"
   | "roundStart"
   | "vote"
   | "score"
   | "winner"
-  | "tick"
   | "whoosh"
   | "pop";
 
@@ -169,31 +166,7 @@ export function useSoundEffects() {
             break;
           }
 
-          case "countdown": {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain).connect(ctx.destination);
-            osc.type = "sine";
-            osc.frequency.setValueAtTime(880, now);
-            gain.gain.setValueAtTime(0.1, now);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-            osc.start(now);
-            osc.stop(now + 0.1);
-            break;
-          }
 
-          case "countdownFinal": {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain).connect(ctx.destination);
-            osc.type = "square";
-            osc.frequency.setValueAtTime(1046, now);
-            gain.gain.setValueAtTime(0.12, now);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-            osc.start(now);
-            osc.stop(now + 0.15);
-            break;
-          }
 
           case "gameStart": {
             [392, 523, 659, 784].forEach((freq, i) => {
@@ -274,18 +247,7 @@ export function useSoundEffects() {
             break;
           }
 
-          case "tick": {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain).connect(ctx.destination);
-            osc.type = "sine";
-            osc.frequency.setValueAtTime(1000, now);
-            gain.gain.setValueAtTime(0.06, now);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
-            osc.start(now);
-            osc.stop(now + 0.03);
-            break;
-          }
+
 
           case "whoosh": {
             const osc = ctx.createOscillator();
