@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useFibbageRoom } from "@/hooks/use-fibbage-room";
 import { useSoundEffects } from "@/hooks/use-sound-effects";
 import { JoinScreen } from "@/components/fibbage/join-screen";
@@ -14,7 +14,6 @@ const SESSION_KEY_PLAYER = "cyberfib_player";
 export default function CyberFibPage() {
   const [roomId, setRoomId] = useState<string | null>(null);
   const [playerId, setPlayerId] = useState<string | null>(null);
-  const [muted, setMuted] = useState(false);
   const sfx = useSoundEffects();
 
   // Restore session from sessionStorage
@@ -58,8 +57,7 @@ export default function CyberFibPage() {
   }, [error, roomId, playerId]);
 
   const toggleMute = () => {
-    const newMuted = !muted;
-    setMuted(newMuted);
+    const newMuted = !sfx.muted;
     sfx.setMuted(newMuted);
     if (!newMuted) sfx.play("click");
   };
@@ -80,13 +78,13 @@ export default function CyberFibPage() {
       onClick={toggleMute}
       className="fixed right-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-full border-[2px] transition-all duration-200 hover:scale-110"
       style={{
-        borderColor: muted ? "rgba(255,255,255,0.08)" : "rgba(0,229,255,0.2)",
-        background: muted ? "rgba(255,255,255,0.03)" : "rgba(0,229,255,0.06)",
-        color: muted ? "rgba(255,255,255,0.25)" : "#00E5FF",
+        borderColor: sfx.muted ? "rgba(255,255,255,0.08)" : "rgba(0,229,255,0.2)",
+        background: sfx.muted ? "rgba(255,255,255,0.03)" : "rgba(0,229,255,0.06)",
+        color: sfx.muted ? "rgba(255,255,255,0.25)" : "#00E5FF",
       }}
-      aria-label={muted ? "Unmute sound effects" : "Mute sound effects"}
+      aria-label={sfx.muted ? "Unmute sound effects" : "Mute sound effects"}
     >
-      {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+      {sfx.muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
     </button>
   );
 

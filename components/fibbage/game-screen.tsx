@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { FibbageRoom, AnswerOption, FibbagePlayer } from "@/lib/fibbage-room";
-import { useSoundEffects } from "@/hooks/use-sound-effects";
+import type { useSoundEffects } from "@/hooks/use-sound-effects";
 import {
   Send,
   Clock,
@@ -753,7 +753,7 @@ function GameOverPhase({ room, playerId, sendAction, loading, sfx }: GameScreenP
 
 // ─── Main Game Screen ───────────────────────────────────────────────────────
 
-export function GameScreen({ room, playerId, sendAction, loading, sfx }: GameScreenProps & { sfx: ReturnType<typeof useSoundEffects> }) {
+export function GameScreen({ room, playerId, sendAction, loading, sfx }: GameScreenProps) {
   return (
     <div
       className="flex min-h-dvh flex-col items-center px-4 py-6"

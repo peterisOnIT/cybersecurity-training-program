@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type SoundName =
   | "click"
@@ -21,28 +21,74 @@ type SoundName =
 
 export function useSoundEffects() {
   const ctxRef = useRef<AudioContext | null>(null);
+  const [muted, setMutedState] = useState(false);
   const mutedRef = useRef(false);
+  const readyRef = useRef(false);
 
-  const getCtx = useCallback(() => {
+  // Create and warm up the AudioContext on first user gesture
+  const ensureReady = useCallback(() => {
+    if (readyRef.current && ctxRef.current?.state === "running") return true;
+
     if (!ctxRef.current) {
-      ctxRef.current = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      try {
+        ctxRef.current = new (
+          window.AudioContext ||
+          (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+        )();
+      } catch {
+        return false;
+      }
     }
+
     if (ctxRef.current.state === "suspended") {
-      ctxRef.current.resume();
+      ctxRef.current.resume().then(() => {
+        readyRef.current = true;
+      });
+      return false; // Not ready yet this frame, but will be next call
     }
-    return ctxRef.current;
+
+    readyRef.current = true;
+    return true;
   }, []);
+
+  // Warm up the AudioContext on any user interaction with the page
+  useEffect(() => {
+    const warmUp = () => {
+      ensureReady();
+      // Remove after first interaction
+      if (readyRef.current) {
+        document.removeEventListener("click", warmUp);
+        document.removeEventListener("touchstart", warmUp);
+        document.removeEventListener("keydown", warmUp);
+      }
+    };
+
+    document.addEventListener("click", warmUp, { passive: true });
+    document.addEventListener("touchstart", warmUp, { passive: true });
+    document.addEventListener("keydown", warmUp, { passive: true });
+
+    return () => {
+      document.removeEventListener("click", warmUp);
+      document.removeEventListener("touchstart", warmUp);
+      document.removeEventListener("keydown", warmUp);
+    };
+  }, [ensureReady]);
 
   const play = useCallback(
     (sound: SoundName) => {
       if (mutedRef.current) return;
+
+      // Try to ensure audio is ready
+      ensureReady();
+
+      const ctx = ctxRef.current;
+      if (!ctx || ctx.state !== "running") return;
+
       try {
-        const ctx = getCtx();
         const now = ctx.currentTime;
 
         switch (sound) {
           case "click": {
-            // Short crisp click
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.connect(gain).connect(ctx.destination);
@@ -56,7 +102,6 @@ export function useSoundEffects() {
           }
 
           case "submit": {
-            // Ascending two-tone confirmation
             const osc1 = ctx.createOscillator();
             const osc2 = ctx.createOscillator();
             const gain1 = ctx.createGain();
@@ -80,7 +125,6 @@ export function useSoundEffects() {
           }
 
           case "correct": {
-            // Triumphant ascending chord
             [523, 659, 784].forEach((freq, i) => {
               const osc = ctx.createOscillator();
               const gain = ctx.createGain();
@@ -97,7 +141,6 @@ export function useSoundEffects() {
           }
 
           case "wrong": {
-            // Descending buzz
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.connect(gain).connect(ctx.destination);
@@ -112,7 +155,6 @@ export function useSoundEffects() {
           }
 
           case "reveal": {
-            // Dramatic rising sweep
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.connect(gain).connect(ctx.destination);
@@ -128,7 +170,6 @@ export function useSoundEffects() {
           }
 
           case "countdown": {
-            // Soft tick
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.connect(gain).connect(ctx.destination);
@@ -142,7 +183,6 @@ export function useSoundEffects() {
           }
 
           case "countdownFinal": {
-            // Louder final countdown beep
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.connect(gain).connect(ctx.destination);
@@ -156,7 +196,6 @@ export function useSoundEffects() {
           }
 
           case "gameStart": {
-            // Fanfare-style ascending
             [392, 523, 659, 784].forEach((freq, i) => {
               const osc = ctx.createOscillator();
               const gain = ctx.createGain();
@@ -173,7 +212,6 @@ export function useSoundEffects() {
           }
 
           case "roundStart": {
-            // Two quick ascending tones
             [440, 660].forEach((freq, i) => {
               const osc = ctx.createOscillator();
               const gain = ctx.createGain();
@@ -190,7 +228,6 @@ export function useSoundEffects() {
           }
 
           case "vote": {
-            // Soft lock-in sound
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.connect(gain).connect(ctx.destination);
@@ -205,7 +242,6 @@ export function useSoundEffects() {
           }
 
           case "score": {
-            // Coins / points accumulating
             for (let i = 0; i < 4; i++) {
               const osc = ctx.createOscillator();
               const gain = ctx.createGain();
@@ -222,7 +258,6 @@ export function useSoundEffects() {
           }
 
           case "winner": {
-            // Big victory fanfare
             const notes = [523, 659, 784, 1046];
             notes.forEach((freq, i) => {
               const osc = ctx.createOscillator();
@@ -240,7 +275,6 @@ export function useSoundEffects() {
           }
 
           case "tick": {
-            // Ultra-short tick
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.connect(gain).connect(ctx.destination);
@@ -254,7 +288,6 @@ export function useSoundEffects() {
           }
 
           case "whoosh": {
-            // Quick frequency sweep
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.connect(gain).connect(ctx.destination);
@@ -269,7 +302,6 @@ export function useSoundEffects() {
           }
 
           case "pop": {
-            // Bubbly pop
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.connect(gain).connect(ctx.destination);
@@ -284,15 +316,16 @@ export function useSoundEffects() {
           }
         }
       } catch {
-        // Web Audio not supported, fail silently
+        // Web Audio not supported or context error, fail silently
       }
     },
-    [getCtx]
+    [ensureReady]
   );
 
-  const setMuted = useCallback((muted: boolean) => {
-    mutedRef.current = muted;
+  const setMuted = useCallback((val: boolean) => {
+    mutedRef.current = val;
+    setMutedState(val);
   }, []);
 
-  return { play, setMuted, isMuted: () => mutedRef.current };
+  return { play, setMuted, muted };
 }
