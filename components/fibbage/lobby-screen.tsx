@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import type { FibbageRoom } from "@/lib/fibbage-room";
 import { QRCode } from "@/components/qr-code";
-import { Copy, Check, Users, Zap, Crown, Skull, Sparkles } from "lucide-react";
+import { Copy, Check, Users, Zap, Crown, Skull, Sparkles, LogOut } from "lucide-react";
 import type { useSoundEffects } from "@/hooks/use-sound-effects";
 import { GameSettingsPanel } from "./game-settings";
 
@@ -13,12 +13,13 @@ interface LobbyScreenProps {
   room: FibbageRoom;
   playerId: string;
   onStart: () => void;
+  onLeave: () => void;
   loading: boolean;
   sfx: ReturnType<typeof useSoundEffects>;
   sendAction: (action: string, extra?: Record<string, unknown>) => Promise<unknown>;
 }
 
-export function LobbyScreen({ room, playerId, onStart, loading, sfx, sendAction }: LobbyScreenProps) {
+export function LobbyScreen({ room, playerId, onStart, onLeave, loading, sfx, sendAction }: LobbyScreenProps) {
   const [copied, setCopied] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
   const isHost = room.hostId === playerId;
@@ -290,6 +291,20 @@ export function LobbyScreen({ room, playerId, onStart, loading, sfx, sendAction 
             </p>
           </div>
         )}
+
+        {/* Leave Game */}
+        <button
+          onClick={() => { sfx.play("click"); onLeave(); }}
+          className="flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold transition-all duration-200 hover:scale-105 animate-fade-in"
+          style={{
+            background: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            color: "rgba(255,255,255,0.35)",
+          }}
+        >
+          <LogOut className="h-4 w-4" />
+          Leave Game
+        </button>
       </div>
     </div>
   );
