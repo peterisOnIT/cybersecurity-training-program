@@ -35,6 +35,24 @@ export interface FibbageRound {
   revealed: boolean;
 }
 
+export interface GameSettings {
+  writingTime: number;   // seconds (default 60)
+  votingTime: number;    // seconds (default 30)
+  revealTime: number;    // seconds (default 12)
+  scoresTime: number;    // seconds (default 10)
+  totalRounds: number;   // 1-25 (default 5)
+  customQuestions: FibbageQuestion[] | null; // null = use question bank
+}
+
+export const DEFAULT_SETTINGS: GameSettings = {
+  writingTime: 60,
+  votingTime: 30,
+  revealTime: 12,
+  scoresTime: 10,
+  totalRounds: 5,
+  customQuestions: null,
+};
+
 export interface FibbageRoom {
   id: string;
   hostId: string;
@@ -51,6 +69,7 @@ export interface FibbageRoom {
   totalRounds: number;
   rounds: FibbageRound[];
   questions: FibbageQuestion[];
+  settings: GameSettings;
   phaseEndsAt: number | null; // timestamp when current phase auto-advances
   createdAt: number;
 }
@@ -286,6 +305,7 @@ export async function createRoom(hostName: string): Promise<{ room: FibbageRoom;
     totalRounds: 5,
     rounds: [],
     questions: [],
+    settings: { ...DEFAULT_SETTINGS },
     phaseEndsAt: null,
     createdAt: Date.now(),
   };
@@ -343,9 +363,18 @@ export async function startGame(roomId: string, playerId: string): Promise<Fibba
   if (room.players.length < 2) return null;
   if (room.status !== "waiting") return null;
 
-  // Select questions
-  room.totalRounds = Math.min(5, QUESTION_BANK.length);
-  room.questions = selectQuestions(room.totalRounds);
+  // Ensure settings exist (backward compat)
+  if (!room.settings) room.settings = { ...DEFAULT_SETTINGS };
+  const s = room.settings;
+
+  // Select questions: use custom questions if provided, otherwise use question bank
+  if (s.customQuestions && s.customQuestions.length > 0) {
+    room.questions = s.customQuestions;
+    room.totalRounds = s.customQuestions.length;
+  } else {
+    room.totalRounds = Math.min(s.totalRounds, QUESTION_BANK.length);
+    room.questions = selectQuestions(room.totalRounds);
+  }
 
   // Start countdown
   room.status = "countdown";
@@ -357,9 +386,10 @@ export async function startGame(roomId: string, playerId: string): Promise<Fibba
   setTimeout(async () => {
     const r = await getRoom(roomId);
     if (r && r.status === "countdown") {
+      const rs = r.settings || DEFAULT_SETTINGS;
       r.status = "writing";
       r.currentRound = 0;
-      r.phaseEndsAt = Date.now() + WRITING_TIME * 1000;
+      r.phaseEndsAt = Date.now() + rs.writingTime * 1000;
       r.rounds = [
         {
           questionIndex: 0,
@@ -438,8 +468,9 @@ function transitionToVoting(room: FibbageRoom) {
   // Shuffle
   round.answers = answers.sort(() => Math.random() - 0.5);
 
+  const s = room.settings || DEFAULT_SETTINGS;
   room.status = "voting";
-  room.phaseEndsAt = Date.now() + VOTING_TIME * 1000;
+  room.phaseEndsAt = Date.now() + s.votingTime * 1000;
 
   // Reset votes
   room.players.forEach((p) => {
@@ -502,9 +533,10 @@ function transitionToReveal(room: FibbageRoom) {
     }
   });
 
+  const s = room.settings || DEFAULT_SETTINGS;
   round.revealed = true;
   room.status = "reveal";
-  room.phaseEndsAt = Date.now() + REVEAL_TIME * 1000;
+  room.phaseEndsAt = Date.now() + s.revealTime * 1000;
 }
 
 export async function advancePhase(roomId: string, playerId: string): Promise<FibbageRoom | null> {
@@ -533,13 +565,15 @@ export async function advancePhase(roomId: string, playerId: string): Promise<Fi
   }
 
   if (room.status === "reveal") {
+    const s = room.settings || DEFAULT_SETTINGS;
     room.status = "scores";
-    room.phaseEndsAt = Date.now() + SCORES_TIME * 1000;
+    room.phaseEndsAt = Date.now() + s.scoresTime * 1000;
     await redis.set(redisKey(roomId), room, { ex: ROOM_TTL });
     return room;
   }
 
   if (room.status === "scores") {
+    const s = room.settings || DEFAULT_SETTINGS;
     // Move to next round or game over
     const nextRound = room.currentRound + 1;
     if (nextRound >= room.totalRounds) {
@@ -548,7 +582,7 @@ export async function advancePhase(roomId: string, playerId: string): Promise<Fi
     } else {
       room.currentRound = nextRound;
       room.status = "writing";
-      room.phaseEndsAt = Date.now() + WRITING_TIME * 1000;
+      room.phaseEndsAt = Date.now() + s.writingTime * 1000;
       room.rounds.push({
         questionIndex: nextRound,
         answers: [],
@@ -579,11 +613,13 @@ export async function autoAdvanceIfExpired(roomId: string): Promise<FibbageRoom 
   if (!room.phaseEndsAt) return null;
   if (Date.now() < room.phaseEndsAt) return null; // not expired yet
 
+  const s = room.settings || DEFAULT_SETTINGS;
+
   if (room.status === "countdown") {
     // Transition countdown -> writing
     room.status = "writing";
     room.currentRound = 0;
-    room.phaseEndsAt = Date.now() + WRITING_TIME * 1000;
+    room.phaseEndsAt = Date.now() + s.writingTime * 1000;
     room.rounds = [
       {
         questionIndex: 0,
@@ -593,8 +629,13 @@ export async function autoAdvanceIfExpired(roomId: string): Promise<FibbageRoom 
       },
     ];
     if (room.questions.length === 0) {
-      room.totalRounds = Math.min(5, QUESTION_BANK.length);
-      room.questions = selectQuestions(room.totalRounds);
+      if (s.customQuestions && s.customQuestions.length > 0) {
+        room.questions = s.customQuestions;
+        room.totalRounds = s.customQuestions.length;
+      } else {
+        room.totalRounds = Math.min(s.totalRounds, QUESTION_BANK.length);
+        room.questions = selectQuestions(room.totalRounds);
+      }
     }
     room.players.forEach((p) => {
       p.lie = null;
@@ -625,7 +666,7 @@ export async function autoAdvanceIfExpired(roomId: string): Promise<FibbageRoom 
 
   if (room.status === "reveal") {
     room.status = "scores";
-    room.phaseEndsAt = Date.now() + SCORES_TIME * 1000;
+    room.phaseEndsAt = Date.now() + s.scoresTime * 1000;
     await redis.set(redisKey(roomId), room, { ex: ROOM_TTL });
     return room;
   }
@@ -638,7 +679,7 @@ export async function autoAdvanceIfExpired(roomId: string): Promise<FibbageRoom 
     } else {
       room.currentRound = nextRound;
       room.status = "writing";
-      room.phaseEndsAt = Date.now() + WRITING_TIME * 1000;
+      room.phaseEndsAt = Date.now() + s.writingTime * 1000;
       room.rounds.push({
         questionIndex: nextRound,
         answers: [],
@@ -656,6 +697,60 @@ export async function autoAdvanceIfExpired(roomId: string): Promise<FibbageRoom 
 
   return null;
 }
+
+export async function updateSettings(
+  roomId: string,
+  playerId: string,
+  settings: Partial<GameSettings>
+): Promise<FibbageRoom | null> {
+  const room = await getRoom(roomId);
+  if (!room) return null;
+  if (room.hostId !== playerId) return null;
+  if (room.status !== "waiting") return null;
+
+  if (!room.settings) room.settings = { ...DEFAULT_SETTINGS };
+
+  // Validate and apply settings
+  if (settings.writingTime !== undefined) {
+    room.settings.writingTime = Math.max(15, Math.min(120, Math.round(settings.writingTime)));
+  }
+  if (settings.votingTime !== undefined) {
+    room.settings.votingTime = Math.max(10, Math.min(60, Math.round(settings.votingTime)));
+  }
+  if (settings.revealTime !== undefined) {
+    room.settings.revealTime = Math.max(5, Math.min(30, Math.round(settings.revealTime)));
+  }
+  if (settings.scoresTime !== undefined) {
+    room.settings.scoresTime = Math.max(5, Math.min(30, Math.round(settings.scoresTime)));
+  }
+  if (settings.totalRounds !== undefined) {
+    room.settings.totalRounds = Math.max(1, Math.min(25, Math.round(settings.totalRounds)));
+  }
+  if (settings.customQuestions !== undefined) {
+    if (settings.customQuestions === null) {
+      room.settings.customQuestions = null;
+    } else {
+      // Validate each question
+      const validQuestions = settings.customQuestions
+        .filter((q) => q.prompt && q.prompt.trim() && q.truth && q.truth.trim())
+        .map((q) => ({
+          prompt: q.prompt.trim(),
+          truth: q.truth.trim(),
+          category: q.category || "concepts" as const,
+          funFact: q.funFact?.trim() || undefined,
+        }));
+      room.settings.customQuestions = validQuestions.length > 0 ? validQuestions.slice(0, 25) : null;
+      if (room.settings.customQuestions) {
+        room.settings.totalRounds = room.settings.customQuestions.length;
+      }
+    }
+  }
+
+  await redis.set(redisKey(roomId), room, { ex: ROOM_TTL });
+  return room;
+}
+
+export const QUESTION_BANK_SIZE = QUESTION_BANK.length;
 
 export async function playAgain(roomId: string, playerId: string): Promise<FibbageRoom | null> {
   const room = await getRoom(roomId);

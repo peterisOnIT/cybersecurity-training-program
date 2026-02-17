@@ -116,7 +116,7 @@ function WritingPhase({ room, playerId, sendAction, loading, sfx }: GameScreenPr
       {/* Header bar */}
       <div className="flex w-full items-center justify-between">
         <PhaseBadge label={`Round ${room.currentRound + 1}/${room.totalRounds}`} color="#FF2D78" icon={Shield} />
-        <ProgressRing remaining={timer} total={60} color={timer <= 5 ? "#FF2D78" : "#00E5FF"} />
+        <ProgressRing remaining={timer} total={room.settings?.writingTime ?? 60} color={timer <= 5 ? "#FF2D78" : "#00E5FF"} />
       </div>
 
       {/* Question card */}
@@ -267,7 +267,7 @@ function VotingPhase({ room, playerId, sendAction, loading, sfx }: GameScreenPro
     <div className="flex w-full flex-col items-center gap-5">
       <div className="flex w-full items-center justify-between">
         <PhaseBadge label="Pick the truth" color="#00E5FF" icon={Target} />
-        <ProgressRing remaining={timer} total={30} color={timer <= 5 ? "#FF2D78" : "#00E5FF"} />
+        <ProgressRing remaining={timer} total={room.settings?.votingTime ?? 30} color={timer <= 5 ? "#FF2D78" : "#00E5FF"} />
       </div>
 
       {/* Question reminder */}

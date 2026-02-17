@@ -5,6 +5,7 @@ import {
   submitVote,
   advancePhase,
   playAgain,
+  updateSettings,
 } from "@/lib/fibbage-room";
 
 export async function POST(req: Request) {
@@ -39,6 +40,12 @@ export async function POST(req: Request) {
         break;
       case "play_again":
         room = await playAgain(roomId, playerId);
+        break;
+      case "update_settings":
+        if (!body.settings || typeof body.settings !== "object") {
+          return NextResponse.json({ error: "Settings object is required" }, { status: 400 });
+        }
+        room = await updateSettings(roomId, playerId, body.settings);
         break;
       default:
         return NextResponse.json({ error: "Unknown action" }, { status: 400 });

@@ -314,4 +314,44 @@
     background-size: 200% 100%;
     animation: shimmer 1.5s ease-in-out infinite;
   }
+
+  /* Game settings slider */
+  .game-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    outline: none;
+    background: linear-gradient(
+      to right,
+      var(--slider-color) 0%,
+      var(--slider-color) var(--slider-pct),
+      rgba(255, 255, 255, 0.08) var(--slider-pct),
+      rgba(255, 255, 255, 0.08) 100%
+    );
+  }
+  .game-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--slider-color);
+    border: 2px solid rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    box-shadow: 0 0 8px color-mix(in srgb, var(--slider-color) 40%, transparent);
+    transition: transform 0.15s ease;
+  }
+  .game-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+  }
+  .game-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--slider-color);
+    border: 2px solid rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    box-shadow: 0 0 8px color-mix(in srgb, var(--slider-color) 40%, transparent);
+  }
 }

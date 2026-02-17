@@ -72,6 +72,15 @@ export default function CyberFibPage() {
     setPlayerId(newPlayerId);
   };
 
+  const handleLeave = useCallback(() => {
+    setRoomId(null);
+    setPlayerId(null);
+    try {
+      localStorage.removeItem(SESSION_KEY_ROOM);
+      localStorage.removeItem(SESSION_KEY_PLAYER);
+    } catch { /* noop */ }
+  }, []);
+
   // Mute toggle button (always visible)
   const muteButton = (
     <button
@@ -136,8 +145,10 @@ export default function CyberFibPage() {
           room={room}
           playerId={playerId}
           onStart={() => sendAction("start")}
+          onLeave={handleLeave}
           loading={loading}
           sfx={sfx}
+          sendAction={sendAction}
         />
       </main>
     );
