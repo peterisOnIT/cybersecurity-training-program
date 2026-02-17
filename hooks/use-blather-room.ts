@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { GameRoom } from "@/lib/game-room";
+import type { BlatherRoom } from "@/lib/blather-room";
 
-interface UseGameRoomOptions {
+interface UseBlatherRoomOptions {
   roomId: string | null;
   playerId: string | null;
   enabled?: boolean;
@@ -15,43 +15,43 @@ export interface DepartedPlayer {
   timestamp: number;
 }
 
-export function useGameRoom({ roomId, playerId, enabled = true }: UseGameRoomOptions) {
-  const [room, setRoom] = useState<GameRoom | null>(null);
+export function useBlatherRoom({ roomId, playerId, enabled = true }: UseBlatherRoomOptions) {
+  const [room, setRoom] = useState<BlatherRoom | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [departedPlayers, setDepartedPlayers] = useState<DepartedPlayer[]>([]);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const roomIdRef = useRef(roomId);
-  const playerIdRef = useRef(playerId);
   const prevPlayerIdsRef = useRef<Map<string, string>>(new Map());
-
-  // Keep refs in sync for the beforeunload handler
-  useEffect(() => { roomIdRef.current = roomId; }, [roomId]);
-  useEffect(() => { playerIdRef.current = playerId; }, [playerId]);
+  const errorCountRef = useRef(0);
 
   const poll = useCallback(async () => {
     if (!roomId || !playerId) return;
     try {
-      const res = await fetch("/api/game/poll", {
+      const res = await fetch("/api/blather/poll", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ roomId, playerId }),
       });
       if (!res.ok) {
-        const data = await res.json();
-        setError(data.error || "Room not found");
+        errorCountRef.current += 1;
+        // Only set a fatal error after 5 consecutive failures
+        if (errorCountRef.current >= 5) {
+          const data = await res.json().catch(() => ({ error: "Room not found" }));
+          setError(data.error || "Room not found");
+        }
         return;
       }
-      const data = await res.json();
-      const newRoom = data.room as GameRoom;
 
-      // Detect departed players by comparing current vs previous player list
+      // Success -- reset error counter
+      errorCountRef.current = 0;
+      const data = await res.json();
+      const newRoom = data.room as BlatherRoom;
+
       if (newRoom && prevPlayerIdsRef.current.size > 0) {
         const newIds = new Set(newRoom.players.map((p) => p.id));
         prevPlayerIdsRef.current.forEach((name, id) => {
           if (!newIds.has(id) && id !== playerId) {
             setDepartedPlayers((prev) => {
-              // Avoid duplicate notifications
               if (prev.some((d) => d.id === id && Date.now() - d.timestamp < 5000)) return prev;
               return [...prev, { id, name, timestamp: Date.now() }];
             });
@@ -59,7 +59,6 @@ export function useGameRoom({ roomId, playerId, enabled = true }: UseGameRoomOpt
         });
       }
 
-      // Update the previous player map
       if (newRoom) {
         const map = new Map<string, string>();
         newRoom.players.forEach((p) => map.set(p.id, p.name));
@@ -69,34 +68,30 @@ export function useGameRoom({ roomId, playerId, enabled = true }: UseGameRoomOpt
       setRoom(newRoom);
       setError(null);
     } catch {
-      setError("Connection lost");
+      errorCountRef.current += 1;
+      if (errorCountRef.current >= 5) {
+        setError("Connection lost");
+      }
     }
   }, [roomId, playerId]);
 
   useEffect(() => {
     if (!enabled || !roomId || !playerId) return;
-
-    // Immediate first poll
+    // Reset error count when starting fresh
+    errorCountRef.current = 0;
     poll();
-
-    // Poll every 1 second for real-time feel
-    intervalRef.current = setInterval(poll, 1000);
-
+    intervalRef.current = setInterval(poll, 1500);
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [enabled, roomId, playerId, poll]);
-
-  // Do NOT send leave on page refresh/unload - session is persisted
-  // so the player can reconnect after refresh. Leave is only sent
-  // explicitly via the "Leave Game" button.
 
   const sendAction = useCallback(
     async (action: string, extra?: Record<string, unknown>) => {
       if (!roomId || !playerId) return null;
       setLoading(true);
       try {
-        const res = await fetch("/api/game/action", {
+        const res = await fetch("/api/blather/action", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ action, roomId, playerId, ...extra }),

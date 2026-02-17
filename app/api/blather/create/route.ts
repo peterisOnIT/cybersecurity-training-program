@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createRoom } from "@/lib/game-room";
+import { createRoom } from "@/lib/blather-room";
 
 export async function POST(req: Request) {
   try {

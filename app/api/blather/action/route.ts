@@ -2,13 +2,14 @@ import { NextResponse } from "next/server";
 import {
   startCountdown,
   startGame,
-  submitAnswer,
-  submitBattlePassword,
-  nextQuestion,
-  showResults,
+  sendSentence,
+  submitGuess,
+  endRound,
+  nextRound,
   resetRoom,
   leaveRoom,
-} from "@/lib/game-room";
+  getRoom,
+} from "@/lib/blather-room";
 
 export async function POST(req: Request) {
   try {
@@ -30,26 +31,25 @@ export async function POST(req: Request) {
         room = await startGame(roomId);
         break;
 
-      case "submit_answer": {
-        const answerNum = Number(body.answer);
-        const qIdx = Number(body.questionIndex);
-        room = await submitAnswer(roomId, playerId, qIdx, answerNum);
+      case "send_sentence": {
+        const template = String(body.template ?? "");
+        const filled = String(body.filled ?? "");
+        room = await sendSentence(roomId, playerId, template, filled);
         break;
       }
 
-      case "battle_submit": {
-        const bIdx = Number(body.questionIndex);
-        const password = String(body.password ?? "");
-        room = await submitBattlePassword(roomId, playerId, bIdx, password);
+      case "submit_guess": {
+        const guess = String(body.guess ?? "");
+        room = await submitGuess(roomId, playerId, guess);
         break;
       }
 
-      case "show_results":
-        room = await showResults(roomId, playerId);
+      case "end_round":
+        room = await endRound(roomId, playerId);
         break;
 
-      case "next_question":
-        room = await nextQuestion(roomId, playerId);
+      case "next_round":
+        room = await nextRound(roomId, playerId);
         break;
 
       case "reset":
@@ -58,7 +58,6 @@ export async function POST(req: Request) {
 
       case "leave":
         room = await leaveRoom(roomId, playerId);
-        // Room might be null if it was deleted (empty)
         if (!room) {
           return NextResponse.json({ room: null, left: true });
         }
@@ -69,10 +68,7 @@ export async function POST(req: Request) {
     }
 
     if (!room) {
-      // For show_results / next_question, the room might have already transitioned
-      // Return a fresh read instead of failing
-      if (action === "show_results" || action === "next_question") {
-        const { getRoom } = await import("@/lib/game-room");
+      if (action === "next_round" || action === "end_round") {
         const fallback = await getRoom(body.roomId);
         if (fallback) return NextResponse.json({ room: fallback });
       }
