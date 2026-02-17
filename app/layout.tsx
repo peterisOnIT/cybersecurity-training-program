@@ -61,6 +61,7 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
+        <div className="cyber-scanlines" aria-hidden="true" />
         {children}
       </body>
     </html>

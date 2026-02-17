@@ -1,14 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Shield, Users, Zap, ArrowLeft, HelpCircle, Trophy, Skull } from "lucide-react";
+import { Shield, Users, Zap, ArrowLeft, HelpCircle, Trophy, Skull, Volume2, VolumeX, Sparkles } from "lucide-react";
+import type { useSoundEffects } from "@/hooks/use-sound-effects";
 
 interface JoinScreenProps {
   onCreated: (roomId: string, playerId: string) => void;
   onJoined: (roomId: string, playerId: string) => void;
+  sfx: ReturnType<typeof useSoundEffects>;
 }
 
-export function JoinScreen({ onCreated, onJoined }: JoinScreenProps) {
+export function JoinScreen({ onCreated, onJoined, sfx }: JoinScreenProps) {
   const [mode, setMode] = useState<"menu" | "host" | "join">("menu");
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
@@ -29,6 +31,7 @@ export function JoinScreen({ onCreated, onJoined }: JoinScreenProps) {
     if (!name.trim()) return;
     setLoading(true);
     setError(null);
+    sfx.play("click");
     try {
       const res = await fetch("/api/fibbage/create", {
         method: "POST",
@@ -37,8 +40,10 @@ export function JoinScreen({ onCreated, onJoined }: JoinScreenProps) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
+      sfx.play("gameStart");
       onCreated(data.room.id, data.playerId);
     } catch (e) {
+      sfx.play("wrong");
       setError(e instanceof Error ? e.message : "Failed to create room");
     } finally {
       setLoading(false);
@@ -49,6 +54,7 @@ export function JoinScreen({ onCreated, onJoined }: JoinScreenProps) {
     if (!name.trim() || !code.trim()) return;
     setLoading(true);
     setError(null);
+    sfx.play("click");
     try {
       const res = await fetch("/api/fibbage/join", {
         method: "POST",
@@ -57,8 +63,10 @@ export function JoinScreen({ onCreated, onJoined }: JoinScreenProps) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
+      sfx.play("submit");
       onJoined(data.room.id, data.playerId);
     } catch (e) {
+      sfx.play("wrong");
       setError(e instanceof Error ? e.message : "Failed to join room");
     } finally {
       setLoading(false);
@@ -70,24 +78,54 @@ export function JoinScreen({ onCreated, onJoined }: JoinScreenProps) {
       className="flex min-h-dvh flex-col items-center justify-center px-4 py-8"
       style={{ background: "var(--cc-dark)" }}
     >
-      <div className="flex w-full max-w-md flex-col items-center gap-6">
+      {/* Subtle background grid */}
+      <div
+        className="pointer-events-none fixed inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
+        }}
+      />
+
+      <div className="relative flex w-full max-w-md flex-col items-center gap-6">
+
         {/* Logo / Title */}
-        <div className="flex flex-col items-center gap-3 animate-slide-up">
-          <div
-            className="flex h-20 w-20 items-center justify-center rounded-3xl border-[3px]"
-            style={{ borderColor: "#FF2D78", background: "rgba(255,45,120,0.1)" }}
-          >
-            <Skull className="h-10 w-10" style={{ color: "#FF2D78" }} />
+        <div className="flex flex-col items-center gap-4 animate-slide-up">
+          <div className="relative">
+            <div
+              className="flex h-24 w-24 items-center justify-center rounded-3xl border-[3px] animate-glow-pulse"
+              style={{
+                borderColor: "#FF2D78",
+                background: "linear-gradient(135deg, rgba(255,45,120,0.12), rgba(255,45,120,0.04))",
+                boxShadow: "0 0 40px rgba(255,45,120,0.15)",
+              }}
+            >
+              <Skull className="h-12 w-12" style={{ color: "#FF2D78" }} />
+            </div>
+            <div
+              className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full animate-pulse"
+              style={{ background: "#39FF14" }}
+            >
+              <Sparkles className="h-3 w-3" style={{ color: "#0B0F1A" }} />
+            </div>
           </div>
-          <h1
-            className="text-center font-mono text-4xl font-black uppercase tracking-tight"
-            style={{ color: "#FF2D78" }}
-          >
-            CyberFib
-          </h1>
+          <div className="flex flex-col items-center gap-1">
+            <h1
+              className="text-center font-mono text-5xl font-black uppercase tracking-tight"
+              style={{ color: "#FF2D78" }}
+            >
+              CyberFib
+            </h1>
+            <div
+              className="rounded-full px-3 py-0.5 text-xs font-black uppercase tracking-widest"
+              style={{ background: "rgba(0,229,255,0.1)", color: "#00E5FF", border: "1px solid rgba(0,229,255,0.2)" }}
+            >
+              Cybersecurity Edition
+            </div>
+          </div>
           <p
             className="max-w-xs text-center text-sm font-medium leading-relaxed"
-            style={{ color: "rgba(255,255,255,0.5)" }}
+            style={{ color: "rgba(255,255,255,0.45)" }}
           >
             Can you spot the real answer? Make up your own and see who falls for it!
           </p>
@@ -96,37 +134,38 @@ export function JoinScreen({ onCreated, onJoined }: JoinScreenProps) {
         {/* How it works */}
         {mode === "menu" && (
           <div
-            className="w-full animate-fade-in rounded-2xl border-[2px] p-4"
-            style={{
-              borderColor: "rgba(255,255,255,0.08)",
-              background: "var(--cc-card)",
-            }}
+            className="w-full animate-fade-in overflow-hidden rounded-2xl border-[2px]"
+            style={{ borderColor: "rgba(255,255,255,0.06)", background: "var(--cc-card)" }}
           >
-            <p
-              className="mb-3 text-center text-xs font-bold uppercase tracking-widest"
-              style={{ color: "rgba(255,255,255,0.3)" }}
+            <div
+              className="px-4 py-2.5 text-center"
+              style={{ background: "rgba(255,255,255,0.02)" }}
             >
-              How to play
-            </p>
-            <div className="flex flex-col gap-2.5">
+              <p
+                className="text-xs font-black uppercase tracking-widest"
+                style={{ color: "rgba(255,255,255,0.25)" }}
+              >
+                How to play
+              </p>
+            </div>
+            <div className="flex flex-col gap-0 p-3">
               {[
-                { icon: HelpCircle, color: "#00E5FF", text: "Read a cybersecurity question with a missing word" },
-                { icon: Skull, color: "#FF2D78", text: "Make up a fake answer that sounds real" },
-                { icon: Users, color: "#FFB800", text: "Vote on which answer you think is correct" },
-                { icon: Trophy, color: "#39FF14", text: "Earn points for guessing right AND tricking others" },
+                { icon: HelpCircle, color: "#00E5FF", text: "Read a cybersecurity question with a missing word", num: "1" },
+                { icon: Skull, color: "#FF2D78", text: "Make up a fake answer that sounds real", num: "2" },
+                { icon: Users, color: "#FFB800", text: "Vote on which answer you think is correct", num: "3" },
+                { icon: Trophy, color: "#39FF14", text: "Earn points for guessing right AND tricking others", num: "4" },
               ].map((step, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-3 rounded-xl px-3 py-2"
-                  style={{ background: "rgba(255,255,255,0.03)" }}
+                  className="flex items-center gap-3 rounded-xl px-3 py-2.5"
                 >
                   <div
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
-                    style={{ background: `${step.color}15` }}
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+                    style={{ background: `${step.color}10`, border: `1px solid ${step.color}20` }}
                   >
                     <step.icon className="h-4 w-4" style={{ color: step.color }} />
                   </div>
-                  <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.7)" }}>
+                  <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.65)" }}>
                     {step.text}
                   </p>
                 </div>
@@ -139,11 +178,11 @@ export function JoinScreen({ onCreated, onJoined }: JoinScreenProps) {
         {mode === "menu" && (
           <div className="flex w-full flex-col gap-3 animate-fade-in">
             <button
-              onClick={() => setMode("host")}
+              onClick={() => { sfx.play("click"); setMode("host"); }}
               className="jackbox-btn flex items-center justify-center gap-3 rounded-2xl border-[3px] px-6 py-4 text-lg"
               style={{
                 borderColor: "#FF2D78",
-                background: "rgba(255,45,120,0.1)",
+                background: "linear-gradient(135deg, rgba(255,45,120,0.12), rgba(255,45,120,0.04))",
                 color: "#FF2D78",
               }}
             >
@@ -151,11 +190,11 @@ export function JoinScreen({ onCreated, onJoined }: JoinScreenProps) {
               Host Game
             </button>
             <button
-              onClick={() => setMode("join")}
+              onClick={() => { sfx.play("click"); setMode("join"); }}
               className="jackbox-btn flex items-center justify-center gap-3 rounded-2xl border-[3px] px-6 py-4 text-lg"
               style={{
                 borderColor: "#00E5FF",
-                background: "rgba(0,229,255,0.08)",
+                background: "linear-gradient(135deg, rgba(0,229,255,0.1), rgba(0,229,255,0.03))",
                 color: "#00E5FF",
               }}
             >
@@ -169,15 +208,15 @@ export function JoinScreen({ onCreated, onJoined }: JoinScreenProps) {
         {mode === "host" && (
           <div className="flex w-full flex-col gap-4 animate-slide-up">
             <button
-              onClick={() => { setMode("menu"); setError(null); }}
-              className="flex items-center gap-2 text-sm font-medium"
+              onClick={() => { sfx.play("pop"); setMode("menu"); setError(null); }}
+              className="flex items-center gap-2 text-sm font-bold transition-colors duration-200 hover:text-white"
               style={{ color: "rgba(255,255,255,0.4)" }}
             >
               <ArrowLeft className="h-4 w-4" /> Back
             </button>
             <div className="flex flex-col gap-2">
               <label
-                className="text-xs font-bold uppercase tracking-wider"
+                className="text-xs font-black uppercase tracking-wider"
                 style={{ color: "rgba(255,255,255,0.4)" }}
                 htmlFor="host-name"
               >
@@ -191,7 +230,7 @@ export function JoinScreen({ onCreated, onJoined }: JoinScreenProps) {
                 placeholder="Enter your name..."
                 maxLength={16}
                 autoFocus
-                className="rounded-xl border-[2px] px-4 py-3 font-bold placeholder:font-normal focus:outline-none"
+                className="rounded-xl border-[2px] px-4 py-3.5 font-bold placeholder:font-normal transition-all duration-200 focus:outline-none focus:shadow-[0_0_20px_rgba(255,45,120,0.15)]"
                 style={{
                   borderColor: "rgba(255,255,255,0.1)",
                   background: "var(--cc-card)",
@@ -208,12 +247,12 @@ export function JoinScreen({ onCreated, onJoined }: JoinScreenProps) {
               className="jackbox-btn flex items-center justify-center gap-2 rounded-2xl border-[3px] px-6 py-4 text-lg disabled:opacity-40"
               style={{
                 borderColor: "#FF2D78",
-                background: "rgba(255,45,120,0.15)",
+                background: "linear-gradient(135deg, rgba(255,45,120,0.15), rgba(255,45,120,0.05))",
                 color: "#FF2D78",
               }}
             >
               {loading ? (
-                <Zap className="h-5 w-5 animate-spin" />
+                <div className="h-5 w-5 rounded-full border-[2px] border-t-transparent animate-spin" style={{ borderColor: "#FF2D78", borderTopColor: "transparent" }} />
               ) : (
                 <>
                   <Shield className="h-5 w-5" />
@@ -228,15 +267,15 @@ export function JoinScreen({ onCreated, onJoined }: JoinScreenProps) {
         {mode === "join" && (
           <div className="flex w-full flex-col gap-4 animate-slide-up">
             <button
-              onClick={() => { setMode("menu"); setError(null); }}
-              className="flex items-center gap-2 text-sm font-medium"
+              onClick={() => { sfx.play("pop"); setMode("menu"); setError(null); }}
+              className="flex items-center gap-2 text-sm font-bold transition-colors duration-200 hover:text-white"
               style={{ color: "rgba(255,255,255,0.4)" }}
             >
               <ArrowLeft className="h-4 w-4" /> Back
             </button>
             <div className="flex flex-col gap-2">
               <label
-                className="text-xs font-bold uppercase tracking-wider"
+                className="text-xs font-black uppercase tracking-wider"
                 style={{ color: "rgba(255,255,255,0.4)" }}
                 htmlFor="join-code"
               >
@@ -250,7 +289,7 @@ export function JoinScreen({ onCreated, onJoined }: JoinScreenProps) {
                 placeholder="XXXXX"
                 maxLength={5}
                 autoFocus
-                className="rounded-xl border-[2px] px-4 py-3 text-center font-mono text-2xl font-black uppercase tracking-[0.3em] placeholder:tracking-[0.3em] focus:outline-none"
+                className="rounded-xl border-[2px] px-4 py-4 text-center font-mono text-3xl font-black uppercase tracking-[0.3em] placeholder:tracking-[0.3em] transition-all duration-200 focus:outline-none focus:shadow-[0_0_20px_rgba(0,229,255,0.15)]"
                 style={{
                   borderColor: "rgba(255,255,255,0.1)",
                   background: "var(--cc-card)",
@@ -262,7 +301,7 @@ export function JoinScreen({ onCreated, onJoined }: JoinScreenProps) {
             </div>
             <div className="flex flex-col gap-2">
               <label
-                className="text-xs font-bold uppercase tracking-wider"
+                className="text-xs font-black uppercase tracking-wider"
                 style={{ color: "rgba(255,255,255,0.4)" }}
                 htmlFor="join-name"
               >
@@ -275,7 +314,7 @@ export function JoinScreen({ onCreated, onJoined }: JoinScreenProps) {
                 onChange={(e) => setName(e.target.value.slice(0, 16))}
                 placeholder="Enter your name..."
                 maxLength={16}
-                className="rounded-xl border-[2px] px-4 py-3 font-bold placeholder:font-normal focus:outline-none"
+                className="rounded-xl border-[2px] px-4 py-3.5 font-bold placeholder:font-normal transition-all duration-200 focus:outline-none focus:shadow-[0_0_20px_rgba(0,229,255,0.15)]"
                 style={{
                   borderColor: "rgba(255,255,255,0.1)",
                   background: "var(--cc-card)",
@@ -292,12 +331,12 @@ export function JoinScreen({ onCreated, onJoined }: JoinScreenProps) {
               className="jackbox-btn flex items-center justify-center gap-2 rounded-2xl border-[3px] px-6 py-4 text-lg disabled:opacity-40"
               style={{
                 borderColor: "#00E5FF",
-                background: "rgba(0,229,255,0.1)",
+                background: "linear-gradient(135deg, rgba(0,229,255,0.12), rgba(0,229,255,0.04))",
                 color: "#00E5FF",
               }}
             >
               {loading ? (
-                <Zap className="h-5 w-5 animate-spin" />
+                <div className="h-5 w-5 rounded-full border-[2px] border-t-transparent animate-spin" style={{ borderColor: "#00E5FF", borderTopColor: "transparent" }} />
               ) : (
                 <>
                   <Users className="h-5 w-5" />
@@ -311,8 +350,8 @@ export function JoinScreen({ onCreated, onJoined }: JoinScreenProps) {
         {/* Error */}
         {error && (
           <div
-            className="w-full animate-pop-in rounded-2xl border-[3px] px-5 py-3 text-center text-sm font-bold"
-            style={{ borderColor: "#FF2D78", background: "rgba(255,45,120,0.1)", color: "#FF2D78" }}
+            className="w-full animate-pop-in rounded-2xl border-[3px] px-5 py-3.5 text-center text-sm font-bold"
+            style={{ borderColor: "#FF2D78", background: "rgba(255,45,120,0.08)", color: "#FF2D78" }}
             role="alert"
           >
             {error}
