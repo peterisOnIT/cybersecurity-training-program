@@ -138,6 +138,7 @@ export default function CyberFibPage() {
           onStart={() => sendAction("start")}
           loading={loading}
           sfx={sfx}
+          sendAction={sendAction}
         />
       </main>
     );

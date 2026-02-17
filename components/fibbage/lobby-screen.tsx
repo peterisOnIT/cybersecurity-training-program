@@ -5,6 +5,7 @@ import type { FibbageRoom } from "@/lib/fibbage-room";
 import { QRCode } from "@/components/qr-code";
 import { Copy, Check, Users, Zap, Crown, Skull, Sparkles } from "lucide-react";
 import type { useSoundEffects } from "@/hooks/use-sound-effects";
+import { GameSettingsPanel } from "./game-settings";
 
 const PUBLIC_DOMAIN = "https://cybertrain.work";
 
@@ -14,9 +15,10 @@ interface LobbyScreenProps {
   onStart: () => void;
   loading: boolean;
   sfx: ReturnType<typeof useSoundEffects>;
+  sendAction: (action: string, extra?: Record<string, unknown>) => Promise<unknown>;
 }
 
-export function LobbyScreen({ room, playerId, onStart, loading, sfx }: LobbyScreenProps) {
+export function LobbyScreen({ room, playerId, onStart, loading, sfx, sendAction }: LobbyScreenProps) {
   const [copied, setCopied] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
   const isHost = room.hostId === playerId;
@@ -247,6 +249,14 @@ export function LobbyScreen({ room, playerId, onStart, loading, sfx }: LobbyScre
             ))}
           </div>
         </div>
+
+        {/* Game Settings (host only) */}
+        {isHost && room.settings && (
+          <GameSettingsPanel
+            settings={room.settings}
+            sendAction={sendAction}
+          />
+        )}
 
         {/* Start / Waiting */}
         {isHost ? (
