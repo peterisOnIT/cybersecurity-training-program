@@ -40,7 +40,7 @@
   --success: oklch(0.80 0.22 145);
   --warning: oklch(0.82 0.17 80);
 
-  /* Cyber Clash game-specific tokens */
+  /* CyberFib game-specific tokens */
   --cc-cyan: #00E5FF;
   --cc-magenta: #FF2D78;
   --cc-lime: #39FF14;

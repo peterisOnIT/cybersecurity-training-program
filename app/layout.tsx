@@ -9,27 +9,30 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CyberBlather - Cybersecurity Word Guessing Party Game",
+  title: "CyberFib - Cybersecurity Guessing Game for Kids",
   description:
-    "A multiplayer party game where players describe cybersecurity terms using sentence templates while others race to guess. Learn about phishing, encryption, and more through play.",
+    "A fun multiplayer party game where kids make up fake answers to cybersecurity questions, then everyone votes on which one is real. Learn online safety while having a blast!",
   keywords: [
     "cybersecurity",
-    "cyberblather",
-    "blather round",
-    "word guessing",
+    "fibbage",
+    "cyberfib",
+    "trivia",
     "party game",
     "multiplayer",
-    "training",
+    "kids",
+    "K-12",
+    "online safety",
     "security awareness",
+    "educational game",
   ],
-  authors: [{ name: "CyberBlather" }],
+  authors: [{ name: "CyberFib" }],
   openGraph: {
     type: "website",
     locale: "en_US",
-    siteName: "CyberBlather",
-    title: "CyberBlather - Cybersecurity Word Guessing Party Game",
+    siteName: "CyberFib",
+    title: "CyberFib - Cybersecurity Guessing Game for Kids",
     description:
-      "Describe cybersecurity terms, guess what others describe, and learn through play in this multiplayer party game.",
+      "Can you spot the real answer? Make up your own and see who falls for it! A fun multiplayer game to learn about online safety.",
   },
   robots: { index: true, follow: true },
 };
